@@ -16,6 +16,7 @@ FONT = FontProperties(fname="/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc")
 BLUE = "#2a78d6"
 ORANGE = "#eb6834"
 AQUA = "#1baf7a"
+VIOLET = "#7c3aed"
 INK = "#0b0b0b"
 MUTED = "#52514e"
 GRID = "#d9d8d4"
@@ -139,7 +140,47 @@ def e1_figure():
     plt.close(fig)
 
 
+def s1_figure():
+    s1 = json.load(open(BASE / "sim/results/s1_network/s1_results.json"))["primary"]["summary"]
+    rhos = [0.0, 0.5, 0.7, 0.9]
+    specs = [
+        ("d1", "D1 直接标量", ORANGE, "s", "--"),
+        ("d2", "D2 直接 CCA", AQUA, "^", ":"),
+        ("l1", "S1-L1 潜层线性", BLUE, "o", "-"),
+        ("l2", "S1-L2 潜层二次", VIOLET, "d", "-"),
+    ]
+    fig, axes = plt.subplots(1, 2, figsize=(7.6, 3.5), dpi=200, sharey=True)
+    for ax, coupling, title in ((axes[0], "linear", "线性耦合"),
+                                (axes[1], "quadratic", "二次耦合")):
+        for det, label, color, marker, ls in specs:
+            ys = [s1[f"{coupling}|{r:.1f}"][det]["power"] for r in rhos]
+            ax.plot(rhos, ys, marker=marker, ls=ls, color=color, lw=2, ms=6,
+                    label=label)
+        ax.set_xlabel("耦合强度 ρ（模型参数）", fontproperties=FONT)
+        ax.set_xlim(-0.03, 0.93)
+        ax.set_ylim(-0.03, 1.03)
+        ax.grid(alpha=0.25, color=GRID)
+        ax.set_axisbelow(True)
+        for spine in ("top", "right"):
+            ax.spines[spine].set_visible(False)
+        ax.set_title(title, fontproperties=FONT, fontsize=10, loc="left")
+    axes[0].set_ylabel("检出率（p < 0.05）", fontproperties=FONT)
+    axes[1].annotate("L2 23/30", (0.9, 0.767), xytext=(0.60, 0.88),
+                     color=VIOLET, fontproperties=FONT, fontsize=9,
+                     arrowprops=dict(arrowstyle="-", color=VIOLET, lw=1))
+    axes[1].annotate("D2 7/30", (0.9, 0.233), xytext=(0.62, 0.14),
+                     color=AQUA, fontproperties=FONT, fontsize=9,
+                     arrowprops=dict(arrowstyle="-", color=AQUA, lw=1))
+    handles, labels = axes[1].get_legend_handles_labels()
+    fig.legend(handles, labels, ncol=4, frameon=False, prop=FONT, fontsize=8,
+               loc="lower center", bbox_to_anchor=(0.5, -0.01))
+    fig.tight_layout(rect=(0, 0.08, 1, 1))
+    fig.savefig(OUT / "fig_s1.png", bbox_inches="tight")
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     r1_figure()
     e1_figure()
-    print("wrote", OUT / "fig_r1.png", OUT / "fig_e1.png")
+    s1_figure()
+    print("wrote", OUT / "fig_r1.png", OUT / "fig_e1.png", OUT / "fig_s1.png")

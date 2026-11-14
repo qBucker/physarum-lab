@@ -61,16 +61,17 @@
 <body>
 
 <h1>黏菌项目 · 建模方法与工具</h1>
-<p class="sub">从 R1 负结果到“先测有效复杂度、再定模型”的可执行协议 · 2026-11-14</p>
-<p class="meta">证据标签：<b>computed（模型内）</b>。`rho` 是模型参数，不是生物学测量；本文不构成实验证据。代码与结果见第 7 节。</p>
+<p class="sub">从 R1 负结果到“先测有效复杂度、再定模型”的可执行协议 · 2026-11-14 · v2（含 S1）</p>
+<p class="meta">证据标签：<b>computed（模型内）</b>。`rho` 是模型参数，不是生物学测量；本文不构成实验证据。代码与结果见第 8 节。</p>
 
 <div class="box">
-<b>四句话</b>
+<b>五句话</b>
 <ol style="margin-bottom:0">
 <li><b>模型是压缩，不是复制。</b> 模型复杂度必须远小于世界的复杂度；用 MDL/BIC、样本外预测、跨皿不变性、干预预测来定义“简洁”。</li>
 <li><b>R1：潜空间预测模型在现实耦合下没有增益。</b> 直接滞后互相关仍是主检测器；潜空间只作解释层。</li>
 <li><b>E1：有效维数可以被测量。</b> POD 参与率回收已知维数（<span class="mono">PR≈known_rank−0.3</span>）；非线性/平稳性检验已校准；单电极可辨识的耦合模态有限。</li>
 <li><b>先测有效复杂度，不先定模型。</b> 用 E1 协议决定模型阶梯的层级；每加一个参数，必须买到预注册的样本外/干预增益。</li>
+<li><b>S1：非线性潜层在测试床上有增益。</b> rho=0.9 二次格 S1-L2 检出 23/30，直接线性 D1/D2 为 4/30、7/30；S1-L2 线性格 0/30。R1 的线性潜层结论不变；直接非线性基线 S1b 尚未做。</li>
 </ol>
 </div>
 
@@ -166,7 +167,57 @@
 <li><b>N_eff ≈ 16</b>：48 h 只支持 1–2 个慢模态、2–4 个参数；这是“模型复杂度必须远小于世界”的定量版本。</li>
 </ul>
 
-<h2 class="pb">4. 模型阶梯与决策规则</h2>
+<h2 class="pb">4. S1：高维/非线性测试床（2026-11-14 新增）</h2>
+
+<p><b>问题</b>：R1 只测了二维线性核，E1 只校准估计量；两者都没有回答“几何 POD + 非线性潜层能否在高维非线性真值上赢过直接检测器”。S1 用平稳、高维、非线性的 Tero–Kobayashi 网络补这一格。</p>
+
+<p><b>真值</b>（测试床装置，不是生物学模型）：12 节点、约 24 边的平面图；对数电导 <span class="mono">d logD = [−(logD−logD0)+α(q^μ/(1+q^μ)−1/2)]dt/τ+σdW</span>，τ=2 h、μ=1.5、α=0.5、σ=0.3。相机 24×20 像素 → 训练段 POD（r≤8）；16 电极 lead-field；0.03 Hz、100 µV 载波 + 10 µV 带内 1/f；背景 OU 30 min。耦合：电边源 = <span class="mono">D(t−600 s)</span>（线性）或 <span class="mono">(D−mean)²</span>（二次）。</p>
+
+<table>
+<tr><th style="width:18%">项</th><th>设置</th></tr>
+<tr><td>网格</td><td>rho ∈ {0, 0.5, 0.7, 0.9} × {linear, quadratic} × 30 次/格；次网格 K={8,32} × rho={0,0.7} × 20；clean rho=1 正对照 10 次</td></tr>
+<tr><td>检测器</td><td>D1 直接标量（max |r|）；D2 直接 CCA（扫描 ±1800 s）；D1f/D2f 固定 600 s；S1-L1 偏滞后线性增益；S1-L2 偏滞后二次增益（全部保留模态的二次项，36 项上限）</td></tr>
+<tr><td>统计</td><td>全样本 R² 增益 + 共同相位代理（50）；α=0.05；匹配 FPR 用 rho=0 的 60 次；lag=600 s；48 h 分析窗（丢前 8 h）</td></tr>
+</table>
+
+<h3>4.1 结果</h3>
+
+<table>
+<tr><th>检测器</th><th class="num">rho=0.9 二次格检出/30</th><th class="num">匹配阈值后</th><th class="num">rho=0.9 线性格检出/30（特异性）</th></tr>
+<tr><td>D1 直接标量</td><td class="num">4</td><td class="num">0.300</td><td class="num">19</td></tr>
+<tr><td>D2 直接 CCA</td><td class="num">7</td><td class="num">0.567</td><td class="num">30</td></tr>
+<tr><td>S1-L1 潜层线性</td><td class="num">19</td><td class="num">0.800</td><td class="num">30</td></tr>
+<tr><td>S1-L2 潜层二次</td><td class="num"><b>23</b></td><td class="num"><b>0.867</b></td><td class="num"><b>0</b></td></tr>
+</table>
+<p class="meta">rho=0 的 60 次 FPR：D1 0.033、D2 0.000、S1-L1 0.017、S1-L2 0.017。次网格 rho=0.7 二次格：K=32 时 S1-L2 0.600 vs D2 0.250；K=8 时 0.450 vs 0.200。正对照：clean 线性格 D2/S1-L1=1.000、S1-L2=0.000；clean 二次格 S1-L1=0.700、S1-L2=0.800、D2=0.300。</p>
+
+<figure>
+<img src="fig_s1.png" alt="S1 detection vs rho">
+<figcaption>图 3｜S1 检出率：线性格中 D2/S1-L1 在 rho=0.9 达 30/30，S1-L2 为 0/30（特异）；二次格中 S1-L2 23/30，直接 D1/D2 仅 4/30、7/30。rho≤0.5 的所有检测器 ≤0.27；可检区间从 rho=0.7 开始。</figcaption>
+</figure>
+
+<h3>4.2 判读</h3>
+
+<ul>
+<li><b>预注册裁决：LATENT ADDS VALUE。</b> rho=0.9 二次格 <span class="mono">max(S1-L1,S1-L2)=0.767</span> vs <span class="mono">max(D1,D2)=0.233</span>，超过 0.20 门槛；方向 100%；匹配阈值后 0.867 vs 0.567。</li>
+<li><b>增益来自非线性层。</b> S1-L1 在同一格 0.633，可由二次源的线性分量解释；S1-L2 线性格 0/30、二次格 23/30，是唯一同时“检出 + 特异”的检测器。R1 的“线性潜层无增益”结论不变。</li>
+<li><b>不是“知道滞后”带来的。</b> S1-L1/S1-L2 用预注册 600 s；同一滞后下的直接固定滞后基线 D1f/D2f 在 rho=0.9 二次格只有 0.133/0.333，仍远低于 S1-L2 0.767。</li>
+<li><b>电极数不改变方向。</b> K=8/32 的 rho=0.7 二次格中 S1-L2 仍高于 D2（0.450 vs 0.200；0.600 vs 0.250）。</li>
+<li><b>只在强耦合区可检。</b> rho≤0.5 的二次格所有方法 ≤0.27；rho=0.7 开始分离，rho=0.9 裁决。这与 E1 的 N_eff≈16、S0 的 48 h 功效不足一致。</li>
+</ul>
+
+<div class="warn">
+<b>限制（必读）</b>：
+<ul style="margin-bottom:0">
+<li>测试床是平稳对数电导 TK 变体，<b>不是</b>黏菌生物学模型；rho 是模型参数，S1 不替代四类对照。</li>
+<li>当前对照是直接<b>线性</b>检测器；同一二次库直接作用于原始观测的<b>直接非线性基线</b>是 S1b 的下一步控制，本裁决尚未证明对直接非线性基线也有优势。</li>
+<li>S1-L2 用了全部 r≤8 模态的二次项（36 项上限）；这是能力上界，不是最终模型。真实数据按阶梯 L3 只保留 3–6 个定向项，并用直接非线性基线控制。</li>
+<li>S1-L1/S1-L2 使用已知 600 s 滞后；滞后估计不是它们的独立证据；方向由前向/反向增益比较给出。</li>
+<li>100 µV 载波使仪器噪声次主导；20 µV 的可探测性属 S0，不由 S1 回答。</li>
+</ul>
+</div>
+
+<h2 class="pb">5. 模型阶梯与决策规则</h2>
 
 <table class="ladder">
 <tr><td class="lv">L1</td><td><b>2–4 参数滞后线性</b><br><span class="math"><i>e</i>(<i>t</i>) = <i>a</i> + <i>b</i>·<i>g</i>(<i>t</i>−τ) + noise</span></td>
@@ -177,7 +228,7 @@
 <td>只在 L1 被拒绝时；每加一个模态必须买到样本外增益。</td></tr>
 <tr><td class="lv">L3</td><td><b>非线性耦合</b><br>二次/饱和/阈值函数</td>
 <td class="gate">非线性 p &lt; 0.05，且样本外 ΔR² ≥ 预注册阈值</td>
-<td>先静态滞后二次；动态非线性（SINDy/多项式 ARX）只在 L3 被证实后。</td></tr>
+<td>先静态滞后二次；S1 的 S1-L2 是全二次库的能力上界（rho=0.9 二次格 23/30）；真实数据用 3–6 个定向项，并配直接非线性基线。动态非线性只在 L3 被证实后。</td></tr>
 <tr><td class="lv">L4</td><td><b>Regime-switching</b><br>分段/时变参数</td>
 <td class="gate">平稳性 p &lt; 0.05，且分段模型样本外优于全局</td>
 <td>窗口数、change-point 预注册；避免把噪声当 regime。</td></tr>
@@ -185,6 +236,8 @@
 <td class="gate">L1–L4 均被拒绝，且潜空间在匹配假阳性率下优于直接检测器</td>
 <td>只作解释/发现问题，不作主检测器；必须有独立锚。</td></tr>
 </table>
+
+<p class="meta">命名提醒：S1 的检测器名 S1-L1 / S1-L2 是检测器，不是本表的阶梯 L1/L2；S1-L2 对应本表的 L3（非线性），S1-L1 对应 L1/L2（线性）。</p>
 
 <div class="box">
 <b>两条硬规则</b>
@@ -196,9 +249,9 @@
 
 <p>L2–L5 不是路线图，而是“L1 被数据拒绝后才启用”的备选；每一级都要在预注册的样本外/干预指标上赢过上一级，否则退回。</p>
 
-<h2 class="pb">5. 工具清单</h2>
+<h2 class="pb">6. 工具清单</h2>
 
-<h3>5.1 观测与动力学</h3>
+<h3>6.1 观测与动力学</h3>
 <table>
 <tr><th style="width:18%">工具</th><th style="width:31%">回答什么问题</th><th style="width:29%">怎么用</th><th style="width:22%">坑</th></tr>
 <tr><td><b>POD / SSA</b></td><td>数据里有几个独立模态？总方差维数？</td><td>SVD；PR、90/95% 能量；对几何图像做 POD 模</td><td>1/f 噪声抬高谱；单看奇异值阈值会高估/低估；用跨皿分布</td></tr>
@@ -207,9 +260,11 @@
 <tr><td><b>ARX / DMDc</b></td><td>带输入/滞后的线性预测；耦合增益</td><td><span class="math"><i>e</i>(<i>t</i>+1) ~ <i>e</i> 历史 + <i>s</i> 历史</span>；样本外 R²；DMDc 加控制输入</td><td>过采样/共线使滞后不可辨识；预测增益不是耦合检测</td></tr>
 <tr><td><b>DMD / Koopman</b></td><td>观测空间中的线性演化算子</td><td>Hankel-DMD；optimized DMD；特征值/模态</td><td>有限字典近似；噪声产生伪特征值；只到坐标变换</td></tr>
 <tr><td><b>SINDy</b></td><td>稀疏非线性动力学方程</td><td>延迟坐标 + 多项式/物理库；稀疏回归；积分形式</td><td>导数噪声；库选择；可辨识性只到坐标变换</td></tr>
+<tr><td><b>S1 测试床</b></td><td>高维/非线性真值上，几何 POD + 潜层是否赢过直接检测器？</td><td><span class="mono">sim/s1_network_testbed.py --grid all</span>；平稳对数电导 TK；24×20 相机；16 电极</td><td>rho≤0.5 欠功效；测试床不是生物学证据；直接非线性基线未做</td></tr>
+<tr><td><b>公开仓检查</b></td><td>发布面是否泄露路径/凭据/证据哈希？</td><td><span class="mono">scripts/check_repo.py</span>；CI</td><td>只查文本/小文件；大文件按 Git LFS 处理</td></tr>
 </table>
 
-<h3>5.2 因果、检验与测量</h3>
+<h3>6.2 因果、检验与测量</h3>
 <table>
 <tr><th style="width:18%">工具</th><th style="width:31%">回答什么问题</th><th style="width:29%">怎么用</th><th style="width:22%">坑</th></tr>
 <tr><td><b>非线性 ARX</b></td><td>静态/低阶非线性耦合</td><td>在滞后 k 处加 s²、s³；样本外 R² + 代理</td><td>多重比较；条件在 e 历史上会吸收非线性</td></tr>
@@ -219,20 +274,21 @@
 <tr><td><b>BIC / AIC / MDL</b></td><td>模型复杂度是否值得？</td><td>BIC = n ln(SSE/n) + k ln n；样本外似然；MDL</td><td>BIC 选预测记忆，不给物理滞后；参数多时惩罚仍可能不足</td></tr>
 <tr><td><b>Lead-field / 可观测性</b></td><td>8 个电极能看见哪些空间模态？</td><td>电极灵敏度矩阵；零空间；模态可见度</td><td>需要空间模型；看不见的模态不能靠软件恢复</td></tr>
 <tr><td><b>测量链</b></td><td>噪声/漂移/时基是否支配结论？</td><td>T1/T2/T6；样本号时基；1/f、输入阻抗、漂移</td><td>主机时间戳不可作时基；DTR/RTS 复位；usbipd 丢样</td></tr>
+<tr><td><b>直接非线性基线</b></td><td>潜层增益是否只是二次库的增益？</td><td>同一二次库直接作用于原始电极/几何摘要；同滞后、同代理、同 FPR</td><td>S1b 待做；不能把“潜层”与“二次库”混为一谈</td></tr>
 </table>
 
-<h2 class="pb">6. 真实数据预注册协议</h2>
+<h2 class="pb">7. 真实数据预注册协议</h2>
 
 <p>在 T3–T5 台架与首批 9 皿之后，按以下顺序跑；<b>在 E1 结果出来之前不固定模型</b>。</p>
 
-<h3>6.1 观测与预处理</h3>
+<h3>7.1 观测与预处理</h3>
 <ul>
 <li><b>E 块</b>：8 个电极通道；按 T3–T5 实测频段确定带通（慢电位 0.003–0.02 Hz，或 AM 包络 0.02–0.05 Hz）；50 Hz notch；样本号时基，不用主机时间戳。</li>
 <li><b>G 块</b>：延时摄影 10 s/帧（1–4 min 节律 → 6–24 样本/周期）；管径均值/方差、分支数、总管长、图论指标（节点/边/圈数）、前 3 个图像 POD 模态。</li>
 <li><b>对齐</b>：相机与 ADC 同一时基；插值到 10 s 帧；丢弃首尾 5% 滤波边缘；标准化。</li>
 </ul>
 
-<h3>6.2 E1 指标与判据</h3>
+<h3>7.2 E1 指标与判据</h3>
 <table>
 <tr><th>指标</th><th>计算</th><th>预注册判据</th></tr>
 <tr><td>有效维数 PR</td><td>联合 [E, G] 的 SVD；PR + 90/95% 能量</td><td>PR ≤ 2 → L1；3–5 → L2；&gt;5 → 先查 CCA/电极，不直接加模型</td></tr>
@@ -243,9 +299,9 @@
 <tr><td>BIC 阶梯</td><td>ARX(p,q) 线性/二次；最低 BIC</td><td>只作预测记忆诊断；滞后由互相关/CCM 给出</td></tr>
 </table>
 
-<h3>6.3 决策与停止规则</h3>
+<h3>7.3 决策与停止规则</h3>
 <ol>
-<li><b>9 皿先做 E1，不拟合耦合模型</b>；每皿独立算 PR/CCA/非线性/平稳性，看跨皿分布。</li>
+<li><b>先做 3 皿 pilot（只跑 M0–M2），过 G1/G2 后上 9 皿</b>；9 皿先做 E1，不拟合耦合模型；每皿独立算 PR/CCA/非线性/平稳性，看跨皿分布。</li>
 <li><b>跨皿不变性</b>：b、τ、非线性/平稳性标志至少在 2/3 皿上同向；否则先查测量/对照，不写模型。</li>
 <li><b>若 PR 低、非线性/平稳性不拒绝</b> → L1 的 2–4 参数模型；预注册 b、τ 的符号/范围；用相位随机化代理检验 b ≠ 0。</li>
 <li><b>若 CCA 秩远小于 PR</b> → 先加观测模态（更多电极、几何/流动），不靠潜空间“补”。</li>
@@ -254,10 +310,22 @@
 </ol>
 
 <div class="warn">
+<b>真实数据前的 3 皿 pilot gate（在 9 皿之前）</b>：
+<ol style="margin-bottom:0">
+<li><b>G0 台架</b>：T3–T5（电极/琼脂漂移、差分）通过；相机标定与分割失败率可接受。</li>
+<li><b>G1 耦合</b>：M1/M2 在匹配 FPR 下高于空载/纯琼脂对照；效应量有置信区间。</li>
+<li><b>G2 非线性</b>：M3（3–6 个定向二次项）买到 M2 买不到的样本外/干预增益，且优于直接非线性基线。</li>
+<li><b>G3 时间序</b>：随机化扰动的响应排序可定（结构 vs 电活动谁先变，差多少）。</li>
+<li><b>G4 材料/几何</b>：同几何水凝胶对照不出现同样的耦合。</li>
+</ol>
+任一失败 → 停在当前级，不加参数、不上 9 皿。
+</div>
+
+<div class="warn">
 <b>停止规则（kill criteria）</b>：若 3 个月 / 9 皿内，L1 的 b 不能稳定检出，或 CCA 秩始终 ≤1 且增加电极/几何也无改善，则转 B 线（方法/工具论文）或材料计量；不把“潜空间很复杂”当作继续的理由。
 </div>
 
-<h2 class="pb">7. 今日产物与复现</h2>
+<h2 class="pb">8. 今日产物与复现</h2>
 
 <table>
 <tr><th style="width:42%">产物</th><th>路径 / 说明</th></tr>
@@ -266,10 +334,14 @@
 <tr><td>R1 证据</td><td><span class="mono">sim/results/r1_latent_recovery/</span>、<span class="mono">r1_clean_control/</span>、<span class="mono">_r1_pilot_rho05_07/</span></td></tr>
 <tr><td>E1 代码</td><td><span class="mono">physarum-lab/sim/e1_effective_complexity.py</span></td></tr>
 <tr><td>E1 证据</td><td><span class="mono">sim/results/e1_effective_complexity/</span>（JSON/CSV/图/摘要/SHA256SUMS）</td></tr>
+<tr><td>S1 方法笔记</td><td><span class="mono">notes/physarum-s1-network-testbed-2026-11-14.md</span></td></tr>
+<tr><td>S1 代码</td><td><span class="mono">physarum-lab/sim/s1_network_testbed.py</span></td></tr>
+<tr><td>S1 证据</td><td><span class="mono">sim/results/s1_network/</span>（summary/JSON/CSV/PNG/SHA256SUMS；exemplar 不发布）</td></tr>
+<tr><td>公开仓</td><td><span class="mono">https://github.com/qBucker/physarum-lab</span>（Public；MIT 代码 + CC BY 4.0 数据/文档；原始数据 Git LFS）</td></tr>
 <tr><td>本文 PDF</td><td><span class="mono">physarum-lab/docs/modeling-methods-tools-2026-11-14.pdf</span></td></tr>
 </table>
 
-<h3>7.1 本机代码地图</h3>
+<h3>8.1 本机代码地图</h3>
 <table>
 <tr><th style="width:38%">路径</th><th>内容</th></tr>
 <tr><td><span class="mono">sim/truth.py</span></td><td>S0 真值模型：慢结构 OU + 电活动包络 + 延迟耦合 + 驱动低通</td></tr>
@@ -277,21 +349,25 @@
 <tr><td><span class="mono">sim/pipeline.py</span></td><td>带通/Hilbert 包络、互相关、相位随机化、块 bootstrap、周期折叠</td></tr>
 <tr><td><span class="mono">sim/r1_latent_recovery.py</span></td><td>R1：延迟嵌入 + DMDc/ARX + 代理；对照 S0 互相关</td></tr>
 <tr><td><span class="mono">sim/e1_effective_complexity.py</span></td><td>E1：PR、CCA、非线性、平稳性、N_eff、BIC 阶梯；合成校准 + 真实数据协议</td></tr>
+<tr><td><span class="mono">sim/s1_network_testbed.py</span></td><td>S1：平稳对数电导 TK、相机 POD、16 电极 lead-field、偏滞后线性/二次增益、匹配 FPR</td></tr>
 <tr><td><span class="mono">sim/results/r1_latent_recovery/</span></td><td>R1 主网格证据（JSON/CSV/图/摘要/SHA256SUMS）</td></tr>
 <tr><td><span class="mono">sim/results/e1_effective_complexity/</span></td><td>E1 校准证据（6 类系统 × 20 seeds）</td></tr>
+<tr><td><span class="mono">sim/results/s1_network/</span></td><td>S1 证据（summary/JSON/CSV/PNG/SHA256SUMS）</td></tr>
+<tr><td><span class="mono">scripts/check_repo.py</span></td><td>公开仓卫生检查：绝对路径、凭据模式、JSON、meta host、SHA256SUMS</td></tr>
 </table>
 
 <pre>cd physarum-lab/sim
 python3 r1_latent_recovery.py --outdir results/r1_latent_recovery --n-sims 30 --n-surr 50
 python3 r1_latent_recovery.py --outdir results/r1_clean_control --n-sims 30 --n-surr 50 --clean --rho-grid 0.0,0.2,0.3,1.0
 python3 r1_latent_recovery.py --outdir results/_r1_pilot_rho05_07 --n-sims 10 --n-surr 50 --rho-grid 0.5,0.7
-python3 e1_effective_complexity.py --outdir results/e1_effective_complexity --n-sims 20 --n-surr 30</pre>
+python3 e1_effective_complexity.py --outdir results/e1_effective_complexity --n-sims 20 --n-surr 30
+python3 s1_network_testbed.py --grid all --outdir results/s1_network</pre>
 
 <div class="box">
-<b>一句话收尾</b>：先测有效复杂度，再选模型；模型复杂度必须远小于世界的复杂度。R1 表明“潜空间预测”在这个 regime 没有资格；E1 表明“数据支持多简单的模型”。下一步不是加模型，而是把 E1 跑到真实数据上。
+<b>一句话收尾</b>：先测有效复杂度，再选模型；模型复杂度必须远小于世界的复杂度。R1 表明“潜空间预测”在这个 regime 没有资格；E1 表明“数据支持多简单的模型”；S1 表明非线性潜层在测试床上有增益，但直接非线性基线（S1b）尚未做。下一步不是加更多模型，而是 S1b + 3 皿 pilot + 相位/流场观测链。
 </div>
 
-<p class="footer">黏菌项目 · 建模方法与工具 · 2026-11-14 · 所有数字为 computed（模型内）；rho 是模型参数，不是生物学测量。证据以各目录 SHA256SUMS 为准。</p>
+<p class="footer">黏菌项目 · 建模方法与工具 · 2026-11-14 · v2（含 S1）· 所有数字为 computed（模型内）；rho 是模型参数，不是生物学测量。证据以各目录 SHA256SUMS 为准。</p>
 
 </body>
 </html>
