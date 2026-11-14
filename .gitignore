@@ -1,0 +1,22 @@
+# Raw bench data are tracked with Git LFS (see .gitattributes).
+# The internal run log and the third-party vendor tree are not published.
+data/bench-log.md
+vendor/
+sim/results/_*/
+sim/results/s1_network/*.npz
+protocols/archive-ads1256-2026-11-12/
+
+# Internal or derived documents not published
+docs/physarum-lab-phase0-2026-11-07.pdf
+docs/project-2026-11-07.html
+docs/modeling-methods-tools-2026-11-14.pdf
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Local files
+*.log
+*.tmp
+.DS_Store

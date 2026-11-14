@@ -1,0 +1,19 @@
+{
+  "argv": {
+    "n_sims": 60,
+    "n_surr": 200,
+    "outdir": "results/s0_design_v4",
+    "base_seed": 900,
+    "driven_only": true,
+    "spontaneous_only": false,
+    "rho_grid": "0.1,0.2,0.3",
+    "tau_grid": "0.5,1,2",
+    "period_grid": "4,8",
+    "duration_grid": "48"
+  },
+  "outputs": {
+    "s0_design.json": "9593aea51b7833366f88d35fad1e86e8a0f9354615da3e015dd4238fb4d76e66",
+    "s0_design.csv": "0f221c7a3d05eb957bf86c87798875dea28521ffeef294033ab8f443249e60ca",
+    "s0_design.md": "a1669b78f503f5b0f057961e125c24923b95cd624213c6e6ad8cb47d8614321a"
+  }
+}

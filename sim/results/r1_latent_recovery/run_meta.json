@@ -1,0 +1,37 @@
+{
+  "script": "r1_latent_recovery.py",
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "numpy": "2.5.3",
+  "args": {
+    "outdir": "results/r1_latent_recovery",
+    "clean": false,
+    "n_sims": 30,
+    "n_surr": 50,
+    "pilot": false,
+    "rho_grid": "0.0,0.2,0.3"
+  },
+  "constants": {
+    "RHO_GRID": [
+      0.0,
+      0.2,
+      0.3
+    ],
+    "DURATION_H": 48.0,
+    "FS": 1.0,
+    "FRAME_DT": 10.0,
+    "LAG_S": 600.0,
+    "TAU_S": 7200.0,
+    "TAU_E": 1800.0,
+    "SIGNAL_UV": 20.0,
+    "FLICKER_UV": 10.0,
+    "DRIFT_MV_H": 1.0,
+    "Z_SOURCE_OHM": 10000.0,
+    "N_SIMS": 30,
+    "N_SURR": 50,
+    "L_FRAMES": 60,
+    "TRAIN_FRAC": 0.7,
+    "ALPHA": 0.05,
+    "LAG_TOL_S": 120.0,
+    "RIDGE_FRAC": 0.001
+  }
+}

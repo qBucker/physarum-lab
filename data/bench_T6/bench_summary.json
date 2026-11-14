@@ -1,0 +1,89 @@
+{
+  "n": 149144,
+  "duration_s": 599.9972579479218,
+  "fs_median_hz": 248.9928045853794,
+  "mean_mV": -0.02088100103181288,
+  "std_mV": 0.0012243073605673273,
+  "ptp_mV": 0.3115156429,
+  "noise_uv_detrended": 1.2242980722215613,
+  "noise_band_uv": 0.512204354194945,
+  "noise_band_lo_hz": 0.01,
+  "noise_band_hi_hz": 5.0,
+  "drift_mV_per_h_linear": 9.928903039877854e-05,
+  "drift_mV_per_h_binned": 9.645797455109223e-05,
+  "notch_hz": 50.0,
+  "mains_applicable": true,
+  "mains_49_51_over_45_55_raw": 0.07714761745884961,
+  "mains_49_51_over_45_55": 0.011757941337461095,
+  "marker_count": 0,
+  "checks": {
+    "noise_band": true,
+    "drift": true,
+    "mains": true
+  },
+  "pass": true,
+  "thresholds": {
+    "max_noise_uv": 5.0,
+    "max_drift_mv_h": 1.0,
+    "max_mains_ratio": 0.5
+  },
+  "label": "T6",
+  "csv": "samples.csv",
+  "format": "bcikit",
+  "channel": "ch1",
+  "channels": {
+    "ch1": {
+      "noise_band_uv": 0.512204354194945,
+      "drift_mV_per_h_binned": 9.645797455109223e-05,
+      "pass": true
+    },
+    "ch2": {
+      "noise_band_uv": 0.20635026123880412,
+      "drift_mV_per_h_binned": -0.0009714473859244547,
+      "pass": true
+    },
+    "ch3": {
+      "noise_band_uv": 0.0686437734626841,
+      "drift_mV_per_h_binned": 0.0001634944349148535,
+      "pass": true
+    },
+    "ch4": {
+      "noise_band_uv": 0.12207787206991959,
+      "drift_mV_per_h_binned": 2.3264473171624237e-05,
+      "pass": true
+    },
+    "ch5": {
+      "noise_band_uv": 0.18112223015087595,
+      "drift_mV_per_h_binned": -0.00014732583056922363,
+      "pass": true
+    },
+    "ch6": {
+      "noise_band_uv": 0.17872266041585785,
+      "drift_mV_per_h_binned": -0.00017236354532625028,
+      "pass": true
+    },
+    "ch7": {
+      "noise_band_uv": 0.051349902754654814,
+      "drift_mV_per_h_binned": 3.568456117408827e-05,
+      "pass": true
+    },
+    "ch8": {
+      "noise_band_uv": 0.09369026693704047,
+      "drift_mV_per_h_binned": -7.817867167768343e-05,
+      "pass": true
+    }
+  },
+  "channels_pass_all": true,
+  "sequence": {
+    "samples": 149144,
+    "span_samples": 149395,
+    "gaps": 65,
+    "gap_samples": 252,
+    "zero_steps": 0,
+    "gap_fraction": 0.0016868034405435257,
+    "fs_nominal_hz": 250.0,
+    "fs_effective_hz": 248.99280458539548,
+    "effective_sps_sample_clock": 248.99280458539548,
+    "effective_sps_host_clock": 248.57446934023375
+  }
+}

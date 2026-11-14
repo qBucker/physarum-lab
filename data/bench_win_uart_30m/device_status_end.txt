@@ -1,0 +1,7 @@
+# Read after the run. NOTE: opening COM6 toggles DTR/RTS and resets the ESP32,
+# so these counters are post-reset (start of a new boot), not the run totals.
+state=READY output=bcikit profile=eeg_srb2 rate=250 boards=1 channels=8 mask=0xFF
+ads_id=0x3E register_verified=yes clk_requested=2048000 clk_api=2048000
+drdy=0 frames=0 sync_error=0 spi_error=0 timeout=0 queue_overrun=0 transport_drop=0 verify_error=0
+wifi_ssid=OpenBCI-0D2D wifi_ip=192.168.4.1 wifi_protocol=0 wifi_session=none wifi_target=none
+ble_name=BCIKit-2A58 ble_connected=no ble_mtu=0 ble_payload=20 ble_interval=0.00ms

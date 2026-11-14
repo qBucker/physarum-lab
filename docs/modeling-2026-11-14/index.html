@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>黏菌项目 · 建模方法与工具（2026-11-14）</title>
+<style>
+  @page { size: A4; margin: 17mm 16mm 15mm 16mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "WenQuanYi Zen Hei", sans-serif;
+    font-size: 10.2pt; line-height: 1.55; color: #1a1a1a;
+    margin: 0; padding: 0;
+  }
+  h1 { font-size: 20pt; margin: 0 0 4px 0; letter-spacing: 0.5px; }
+  h2 { font-size: 13.5pt; margin: 18px 0 8px 0; padding-bottom: 3px;
+       border-bottom: 2px solid #2a78d6; color: #163f73; }
+  h3 { font-size: 11.2pt; margin: 12px 0 5px 0; color: #2a78d6; }
+  p { margin: 4px 0 7px 0; }
+  ul, ol { margin: 4px 0 8px 20px; padding: 0; }
+  li { margin: 2px 0; }
+  .sub { color: #52514e; font-size: 10pt; margin: 0 0 14px 0; }
+  .meta { color: #52514e; font-size: 8.8pt; }
+  .box { background: #f5f8fc; border-left: 4px solid #2a78d6;
+         padding: 8px 11px; margin: 9px 0; page-break-inside: avoid; }
+  .warn { background: #fdf2ee; border-left-color: #eb6834; }
+  .good { background: #eef8f3; border-left-color: #1baf7a; }
+  .eq { font-family: "Cambria Math", "Times New Roman", serif;
+        text-align: center; font-size: 11pt; margin: 7px 0; }
+  .math { font-family: "Cambria Math", "Times New Roman", serif; font-size: 10.5pt; }
+  table { width: 100%; border-collapse: collapse; margin: 7px 0 9px 0;
+          font-size: 8.9pt; page-break-inside: avoid; }
+  th { background: #eaf2fc; color: #163f73; font-weight: 600;
+       border-bottom: 1.5px solid #2a78d6; padding: 4px 5px; text-align: left; }
+  td { border-bottom: 1px solid #ddddda; padding: 4px 5px; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .center { text-align: center; }
+  figure { margin: 8px 0 10px 0; page-break-inside: avoid; }
+  figure img { width: 100%; }
+  figcaption { color: #52514e; font-size: 8.6pt; margin-top: 3px; }
+  .pb { page-break-before: always; }
+  .keep { page-break-inside: avoid; }
+  code, .mono { font-family: Consolas, "WenQuanYi Zen Hei Mono", monospace;
+                font-size: 8.8pt; background: #f1f1ef; padding: 0 3px; border-radius: 2px; }
+  pre { font-family: Consolas, "WenQuanYi Zen Hei Mono", monospace;
+        font-size: 8.6pt; background: #f1f1ef; padding: 7px 9px; border-radius: 3px;
+        line-height: 1.45; white-space: pre-wrap; }
+  .tag { display: inline-block; font-size: 8pt; padding: 1px 6px; border-radius: 9px;
+         background: #eaf2fc; color: #163f73; margin-right: 4px; }
+  .tag.w { background: #fdf2ee; color: #9a3d18; }
+  .tag.g { background: #eef8f3; color: #0f6b4a; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .ladder { width: 100%; border-collapse: collapse; font-size: 9pt; }
+  .ladder td { border: 1px solid #d9d8d4; padding: 6px 7px; }
+  .ladder .lv { background: #eaf2fc; font-weight: 600; color: #163f73; width: 9%; }
+  .ladder .gate { background: #fafafa; color: #52514e; width: 28%; }
+  .footer { color: #8a8985; font-size: 8.2pt; margin-top: 18px;
+            border-top: 1px solid #ddddda; padding-top: 6px; }
+</style>
+</head>
+<body>
+
+<h1>黏菌项目 · 建模方法与工具</h1>
+<p class="sub">从 R1 负结果到“先测有效复杂度、再定模型”的可执行协议 · 2026-11-14</p>
+<p class="meta">证据标签：<b>computed（模型内）</b>。`rho` 是模型参数，不是生物学测量；本文不构成实验证据。代码与结果见第 7 节。</p>
+
+<div class="box">
+<b>四句话</b>
+<ol style="margin-bottom:0">
+<li><b>模型是压缩，不是复制。</b> 模型复杂度必须远小于世界的复杂度；用 MDL/BIC、样本外预测、跨皿不变性、干预预测来定义“简洁”。</li>
+<li><b>R1：潜空间预测模型在现实耦合下没有增益。</b> 直接滞后互相关仍是主检测器；潜空间只作解释层。</li>
+<li><b>E1：有效维数可以被测量。</b> POD 参与率回收已知维数（<span class="mono">PR≈known_rank−0.3</span>）；非线性/平稳性检验已校准；单电极可辨识的耦合模态有限。</li>
+<li><b>先测有效复杂度，不先定模型。</b> 用 E1 协议决定模型阶梯的层级；每加一个参数，必须买到预注册的样本外/干预增益。</li>
+</ol>
+</div>
+
+<h2>1. 两条建模路线，以及三个必须纠正的说法</h2>
+
+<p><b>自下而上</b>：分子马达 → 写微分方程 → 模拟整个网络 → 预测电极信号。多尺度、参数不可辨识、化学/流体黑盒；在 9 皿、48 h 的数据量下几乎不可行。</p>
+
+<p><b>自上而下</b>：降维（找特征）→ 增维（补隐状态）→ 还原（验证演化）。这个方向值得做，但原表述有三处必须改写：</p>
+
+<ol>
+<li><b>信息坍缩不能在软件里补回来。</b> 数据处理不等式：任何对观测的后处理都不能增加关于隐藏状态的信息。Takens 延迟嵌入在严格前提下给出的是<b>与原吸引子微分同胚的等价表示</b>，不是被电极/包络平均掉的化学或流场状态。真实系统随机、非平稳、带 1/f，前提不成立。</li>
+<li><b>观测本来就是低维的。</b> 8 电极是<b>测量算子</b>，不是“高维网络的软件投影”；坍缩发生在物理界面（空间平均、半电池电位、1/f）。真正高维的是延时摄影的几何（管径、分支、图论、POD 模态）。对 8 通道做 PCA 只是旋转；PCA/POD 应作用在几何上。</li>
+<li><b>不可观隐变量没有锚就不可辨识。</b> “虚拟钙浓度”是自由参数；模型会变成万能拟合器。隐状态要么有独立测量（影像几何、扰动响应），要么明确标为现象学变量，不赋予生理名称。正确顺序是先延迟嵌入/Hankel 化，再做 POD/DMD；带扰动用 DMDc。</li>
+</ol>
+
+<div class="good">
+<b>改写后的框架</b>：测量算子与可观测性 → 延迟嵌入（补表示/记忆，不补信息）→ 带约束的潜空间辨识 + <b>直接滞后检测器对照</b>。“还原”只到可观测子空间。
+</div>
+
+<h2>2. R1：潜空间管线的回收测试</h2>
+
+<p><b>问题</b>：在 S0 数字孪生里给定已知的结构 → 电活动耦合（强度 rho、滞后 600 s），延迟嵌入 + DMDc/ARX 能否回收检出、方向、滞后、强度？对照 = S0 现有 max-|r| 互相关。</p>
+
+<p><b>设计</b>（预注册）：48 h、fs 1 Hz、10 s 帧；AM 信号 f0 = 0.03 Hz；tau_s = 2 h、tau_e = 0.5 h；rho ∈ {0, 0.2, 0.3}，30 次/格；10 µV 带内 1/f、1 mV/h 漂移、10 kΩ 源、ADC 1 SPS/PGA 8；结构观测噪声 0.3。潜空间：log Hilbert 包络（0.02–0.05 Hz）+ 结构观测；L = 60 帧（10 min）延迟嵌入；前向/反向 ARX；前 70% 训练、后 30% 测试；统计量 = 样本外 R² 增益；50 相位随机化代理；alpha = 0.05。干净对照与 rho = 0.5/0.7 为后验诊断。</p>
+
+<table>
+<tr><th>条件</th><th class="num">rho</th><th class="num">潜空间前向</th><th class="num">基线互相关</th><th class="num">潜空间滞后（中位/回收）</th><th class="num">基线滞后（中位/回收）</th><th class="num">基线方向</th></tr>
+<tr><td>噪声主网格</td><td class="num">0.0</td><td class="num">2/30</td><td class="num">1/30</td><td class="num">—</td><td class="num">—</td><td class="num">—</td></tr>
+<tr><td>噪声主网格</td><td class="num">0.2</td><td class="num">2/30</td><td class="num">8/30</td><td class="num">305 s / 0%*</td><td class="num">565 s / 50%</td><td class="num">5/8</td></tr>
+<tr><td>噪声主网格</td><td class="num">0.3</td><td class="num">2/30</td><td class="num">11/30</td><td class="num">175 s / 0%*</td><td class="num">600 s / 91%</td><td class="num">11/11</td></tr>
+<tr><td>后验扫描（10 次）</td><td class="num">0.5</td><td class="num">0/10</td><td class="num">8/10</td><td class="num">—</td><td class="num">595 s / 100%</td><td class="num">8/8</td></tr>
+<tr><td>后验扫描（10 次）</td><td class="num">0.7</td><td class="num">5/10</td><td class="num">10/10</td><td class="num">430 s / 40%</td><td class="num">600 s / 100%</td><td class="num">10/10</td></tr>
+<tr><td>干净 + 阳性对照</td><td class="num">1.0</td><td class="num">30/30</td><td class="num">30/30</td><td class="num">590 s / 100%</td><td class="num">600 s / 100%</td><td class="num">30/30</td></tr>
+</table>
+<p class="meta">* 潜空间检出仅 1–2 次，滞后/方向不作判读；潜空间反向检出 1–3/30，与零假设同水平，无方向可分性。基线方向 = 检出者中滞后符号为正（结构领先电活动）的比例。</p>
+
+<figure>
+<img src="fig_r1.png" alt="R1 detection vs rho">
+<figcaption>图 1｜R1 检出率：现实耦合（rho ≤ 0.3）下潜空间前向与零假设同水平；基线互相关在 rho = 0.3 为 11/30、滞后 600 s；只有近确定性耦合（rho = 1 干净）潜空间才 30/30。后验扫描为 10 次/格，仅作方向性判读。</figcaption>
+</figure>
+
+<h3>2.1 为什么会失败</h3>
+
+<p>在 10 s 采样、tau_s = 2 h 的过采样条件下，<b>e(t) 已经包含 s(t−600 s)</b>，而 s(t−590 s) 与 s(t−600 s) 的相关是 <span class="mono">exp(−10/7200)=0.9986</span>。潜空间模型问的是“在已知 e 自身历史的情况下，s 历史还能不能提升 e 的预测”——这是一个<b>条件独立</b>问题；真实耦合是“e 和 s 在 600 s 滞后处有没有相关”——这是一个<b>匹配滤波/互相关</b>问题。两者不是同一个统计量。rho = 0.3 时，滞后 600 s 的边际相关约 0.33，互相关能看见；条件增益只有 ~10⁻⁴。</p>
+
+<p>更深一层：<b>增维不创造信息</b>（数据处理不等式）。延迟坐标补的是表示/记忆，不是被电极平均掉的状态；在线性高斯真值下，匹配滤波/互相关已经是最优，通用潜空间预测模型没有可赢的空间。R1 的干净 rho = 1 阳性对照 30/30、滞后 590 s、r = 0.999，证明实现正确；失败在灵敏度，不在代码。</p>
+
+<div class="warn">
+<b>裁决</b>：真实数据的主检测器不用通用潜空间预测模型；用直接滞后互相关/CCM。潜空间只作解释层（滞后、强度、方向），且必须先通过高维/非线性测试床；时间序必须靠滞后符号 + 扰动实验，不能靠预测增益。
+</div>
+
+<h2 class="pb">3. E1：先测有效复杂度</h2>
+
+<p><b>目标</b>：在定模型之前，测清楚四个数：<b>有效维数</b>（需要几个独立模态）、<b>非线性</b>（线性耦合够不够）、<b>平稳性</b>（48 h 内参数是否漂移）、<b>有效样本量</b>（数据最多支持几个参数）。E1 在 6 类已知真值的合成系统上校准这些估计量（48 h、10 s 帧、20 seeds/系统）。</p>
+
+<h3>3.1 四个估计量</h3>
+
+<ul>
+<li><b>POD/SSA 参与率 PR</b>：对标准化观测矩阵 X 做 SVD，<span class="math"><i>p</i><sub>i</sub> = σ<sub>i</sub><sup>2</sup> / Σσ<sub>j</sub><sup>2</sup></span>，<span class="math">PR = 1 / Σ<i>p</i><sub>i</sub><sup>2</sup></span>。PR 是“总方差维数”的有效数；配合 90%/95% 累积能量。1/f 噪声会把谱抬高，所以 PR 用中位数/跨皿分布，不用单个奇异值阈值。</li>
+<li><b>CCA 共享模态秩</b>：对电活动块（延迟嵌入）与几何块做典型相关分析；显著 canonical correlation 的个数 = 可辨识的耦合模态数。单电极会低估；它的价值是<b>可观测性诊断</b>，不是维数估计。</li>
+<li><b>非线性检验</b>：在互相关峰值的滞后 k 处，比较 <span class="math"><i>e</i>(<i>t</i>) ~ 1 + <i>s</i>(<i>t</i>−<i>k</i>)</span> 与 <span class="math"><i>e</i>(<i>t</i>) ~ 1 + <i>s</i>(<i>t</i>−<i>k</i>) + <i>s</i>(<i>t</i>−<i>k</i>)<sup>2</sup></span> 的样本外 R²；代理零模型重复“选滞后 + 拟合”全过程。不要条件在 e 自身历史上——过采样会把非线性增益吸收掉。</li>
+<li><b>平稳性检验</b>：在全局滞后 k 处，按 4×12 h 窗口拟合 <span class="math"><i>e</i>(<i>t</i>) ~ 1 + <i>s</i>(<i>t</i>−<i>k</i>)</span>；统计量 = 后半段平均系数 − 前半段平均系数；零分布用对齐序列的循环块 bootstrap（块 = 6 h，短于 regime）。同时报告 z 和 p。</li>
+<li><b>有效样本量 N_eff</b>：对最慢的几何模态做积分自相关时间 <span class="math">τ<sub>int</sub> = 1 + 2Σρ<sub>k</sub></span>，<span class="math">N<sub>eff</sub> = <i>n</i> / τ<sub>int</sub></span>。48 h、tau_s = 2 h → N_eff ≈ 12–16；这直接限制模型参数个数（经验规则：每参数 ≥10 个独立样本）。</li>
+<li><b>BIC 模型阶梯</b>：ARX(p,q) 线性 vs 二次，p ∈ {1,2,4}，q ∈ {1,4,16,60}，取最低 BIC。注意：BIC 选的是<b>预测记忆</b>，不是物理滞后；本次所有系统都选 q = 1，因为 10 s 采样下 600 s 滞后对预测不可辨识。</li>
+</ul>
+
+<h3>3.2 校准结果</h3>
+
+<table>
+<tr><th>系统</th><th class="num">已知模态</th><th class="num">已知总维数</th><th class="num">POD PR</th><th class="num">CCA 秩</th><th class="num">N_eff</th><th class="num">非线性功效</th><th class="num">平稳性功效</th></tr>
+<tr><td>s0（线性、平稳）</td><td class="num">1</td><td class="num">2</td><td class="num">1.90</td><td class="num">0</td><td class="num">15.6</td><td class="num">0.00</td><td class="num">0.05</td></tr>
+<tr><td>K=2 线性</td><td class="num">2</td><td class="num">3</td><td class="num">2.79</td><td class="num">1</td><td class="num">21.4</td><td class="num">—</td><td class="num">—</td></tr>
+<tr><td>K=4 线性</td><td class="num">4</td><td class="num">5</td><td class="num">4.70</td><td class="num">1</td><td class="num">19.0</td><td class="num">—</td><td class="num">—</td></tr>
+<tr><td>K=8 线性</td><td class="num">8</td><td class="num">9</td><td class="num">8.64</td><td class="num">3</td><td class="num">17.9</td><td class="num">—</td><td class="num">—</td></tr>
+<tr><td>非线性</td><td class="num">1</td><td class="num">2</td><td class="num">1.89</td><td class="num">1</td><td class="num">18.3</td><td class="num">0.55</td><td class="num">0.10</td></tr>
+<tr><td>非平稳（0 → 0.6）</td><td class="num">1</td><td class="num">2</td><td class="num">1.90</td><td class="num">0</td><td class="num">19.3</td><td class="num">0.00</td><td class="num">0.40</td></tr>
+</table>
+<p class="meta">功效 = 20 次中 p &lt; 0.05 的比例；s0 的平稳性假阳性 0.05，非线性假阳性 0.00。CCA 秩为单电活动通道的保守估计（K=8 时只识别 3 个模态），说明“电极看得见的模态”远少于“结构有多少模态”。</p>
+
+<figure>
+<img src="fig_e1.png" alt="E1 calibration">
+<figcaption>图 2｜左：POD 参与率 PR 回收已知总维数（s0、非线性、非平稳三点重合于 2）；右：非线性检验与平稳性检验的功效。平稳性检验对 0 → 0.6 的强变化只有 0.40 功效，弱变化需要更长记录或更强扰动。</figcaption>
+</figure>
+
+<h3>3.3 读法</h3>
+
+<ul>
+<li><b>PR 是可靠的“有效维数”估计</b>：6 类系统都在已知维数 −0.3 以内；它回答“数据里实际上有几个独立模态”，而不是“网络有多少节点”。</li>
+<li><b>CCA 秩是观测性诊断</b>：单电活动通道在 K=8 时只识别 3 个耦合模态；这不是 CCA 的失败，而是<b>测量算子看不见</b>。要分辨更多模态，需要更多电极/几何特征，而不是更复杂的模型。CCA 在 s0 上中位数为 0（阈值过保守），<b>不能用来判定“无耦合”</b>；只看相对趋势。</li>
+<li><b>非线性检验可用，但只对“静态非线性”敏感</b>：0.55 功效，假阳性 0；对弱非线性或动态非线性，需要更长记录或更强设计。</li>
+<li><b>平稳性检验功效有限</b>：0 → 0.6 的强变化只有 0.40 功效；0.1 → 0.4 的弱变化基本看不见。48 h、9 皿的设计不能可靠地检测弱非平稳；要么延长记录，要么用更强的扰动。</li>
+<li><b>BIC 不能给物理滞后</b>：q = 1 是过采样伪影；滞后必须由互相关/CCM/干预给出。</li>
+<li><b>N_eff ≈ 16</b>：48 h 只支持 1–2 个慢模态、2–4 个参数；这是“模型复杂度必须远小于世界”的定量版本。</li>
+</ul>
+
+<h2 class="pb">4. 模型阶梯与决策规则</h2>
+
+<table class="ladder">
+<tr><td class="lv">L1</td><td><b>2–4 参数滞后线性</b><br><span class="math"><i>e</i>(<i>t</i>) = <i>a</i> + <i>b</i>·<i>g</i>(<i>t</i>−τ) + noise</span></td>
+<td class="gate">PR ≤ 2；非线性 p ≥ 0.05；平稳性 p ≥ 0.05；N_eff ≥ 10</td>
+<td>主模型。先拟合 b、τ；跨皿不变性；用代理检验 b ≠ 0。</td></tr>
+<tr><td class="lv">L2</td><td><b>多模态线性</b><br>2–5 个几何模态，各自增益/滞后</td>
+<td class="gate">PR 3–5 或 CCA 秩 ≥ 2；L1 残差有结构</td>
+<td>只在 L1 被拒绝时；每加一个模态必须买到样本外增益。</td></tr>
+<tr><td class="lv">L3</td><td><b>非线性耦合</b><br>二次/饱和/阈值函数</td>
+<td class="gate">非线性 p &lt; 0.05，且样本外 ΔR² ≥ 预注册阈值</td>
+<td>先静态滞后二次；动态非线性（SINDy/多项式 ARX）只在 L3 被证实后。</td></tr>
+<tr><td class="lv">L4</td><td><b>Regime-switching</b><br>分段/时变参数</td>
+<td class="gate">平稳性 p &lt; 0.05，且分段模型样本外优于全局</td>
+<td>窗口数、change-point 预注册；避免把噪声当 regime。</td></tr>
+<tr><td class="lv">L5</td><td><b>潜状态空间 / SINDy</b><br>延迟嵌入 + 稀疏辨识</td>
+<td class="gate">L1–L4 均被拒绝，且潜空间在匹配假阳性率下优于直接检测器</td>
+<td>只作解释/发现问题，不作主检测器；必须有独立锚。</td></tr>
+</table>
+
+<div class="box">
+<b>两条硬规则</b>
+<ol style="margin-bottom:0">
+<li><b>每加一个参数，必须买到预注册的样本外/干预增益。</b> 买不到就退回上一级；不允许“拟合更好”作为加复杂度的理由。</li>
+<li><b>简洁性用可审计的量定义</b>：MDL/BIC、N_eff/参数比、跨皿不变性、干预预测。美是生成假设的启发式，不是验证标准。</li>
+</ol>
+</div>
+
+<p>L2–L5 不是路线图，而是“L1 被数据拒绝后才启用”的备选；每一级都要在预注册的样本外/干预指标上赢过上一级，否则退回。</p>
+
+<h2 class="pb">5. 工具清单</h2>
+
+<h3>5.1 观测与动力学</h3>
+<table>
+<tr><th style="width:18%">工具</th><th style="width:31%">回答什么问题</th><th style="width:29%">怎么用</th><th style="width:22%">坑</th></tr>
+<tr><td><b>POD / SSA</b></td><td>数据里有几个独立模态？总方差维数？</td><td>SVD；PR、90/95% 能量；对几何图像做 POD 模</td><td>1/f 噪声抬高谱；单看奇异值阈值会高估/低估；用跨皿分布</td></tr>
+<tr><td><b>CCA</b></td><td>电活动与几何之间有几个可辨识的共享模态？</td><td>电块延迟嵌入 × 几何块；典型相关；代理阈值</td><td>单电极饱和；样本少时过拟合；只作可观测性诊断</td></tr>
+<tr><td><b>延迟嵌入 / Takens</b></td><td>能否用单变量历史重构动力学？</td><td>Hankel 矩阵；嵌入维/延迟；SSA</td><td>随机/非平稳破严格前提；补表示不补信息</td></tr>
+<tr><td><b>ARX / DMDc</b></td><td>带输入/滞后的线性预测；耦合增益</td><td><span class="math"><i>e</i>(<i>t</i>+1) ~ <i>e</i> 历史 + <i>s</i> 历史</span>；样本外 R²；DMDc 加控制输入</td><td>过采样/共线使滞后不可辨识；预测增益不是耦合检测</td></tr>
+<tr><td><b>DMD / Koopman</b></td><td>观测空间中的线性演化算子</td><td>Hankel-DMD；optimized DMD；特征值/模态</td><td>有限字典近似；噪声产生伪特征值；只到坐标变换</td></tr>
+<tr><td><b>SINDy</b></td><td>稀疏非线性动力学方程</td><td>延迟坐标 + 多项式/物理库；稀疏回归；积分形式</td><td>导数噪声；库选择；可辨识性只到坐标变换</td></tr>
+</table>
+
+<h3>5.2 因果、检验与测量</h3>
+<table>
+<tr><th style="width:18%">工具</th><th style="width:31%">回答什么问题</th><th style="width:29%">怎么用</th><th style="width:22%">坑</th></tr>
+<tr><td><b>非线性 ARX</b></td><td>静态/低阶非线性耦合</td><td>在滞后 k 处加 s²、s³；样本外 R² + 代理</td><td>多重比较；条件在 e 历史上会吸收非线性</td></tr>
+<tr><td><b>状态空间 / Kalman</b></td><td>带测量模型的潜状态；不确定性</td><td>线性高斯 SSM；参数 = 耦合/滞后/噪声</td><td>参数数 vs N_eff；不可观隐变量不可辨识</td></tr>
+<tr><td><b>CCM / 转移熵 / Granger</b></td><td>方向性：谁领先谁？</td><td>交叉映射；滞后互相关；条件 Granger</td><td>预测 ≠ 因果；必须配扰动实验；CCM 对非线性更合适</td></tr>
+<tr><td><b>代理检验</b></td><td>观测到的统计量是否超过零模型？</td><td>相位随机化（平稳线性）、块 bootstrap（慢/驱动）、IAAFT（非线性）</td><td>零模型选错会假阳性；块长要长于相关时间、短于驱动周期</td></tr>
+<tr><td><b>BIC / AIC / MDL</b></td><td>模型复杂度是否值得？</td><td>BIC = n ln(SSE/n) + k ln n；样本外似然；MDL</td><td>BIC 选预测记忆，不给物理滞后；参数多时惩罚仍可能不足</td></tr>
+<tr><td><b>Lead-field / 可观测性</b></td><td>8 个电极能看见哪些空间模态？</td><td>电极灵敏度矩阵；零空间；模态可见度</td><td>需要空间模型；看不见的模态不能靠软件恢复</td></tr>
+<tr><td><b>测量链</b></td><td>噪声/漂移/时基是否支配结论？</td><td>T1/T2/T6；样本号时基；1/f、输入阻抗、漂移</td><td>主机时间戳不可作时基；DTR/RTS 复位；usbipd 丢样</td></tr>
+</table>
+
+<h2 class="pb">6. 真实数据预注册协议</h2>
+
+<p>在 T3–T5 台架与首批 9 皿之后，按以下顺序跑；<b>在 E1 结果出来之前不固定模型</b>。</p>
+
+<h3>6.1 观测与预处理</h3>
+<ul>
+<li><b>E 块</b>：8 个电极通道；按 T3–T5 实测频段确定带通（慢电位 0.003–0.02 Hz，或 AM 包络 0.02–0.05 Hz）；50 Hz notch；样本号时基，不用主机时间戳。</li>
+<li><b>G 块</b>：延时摄影 10 s/帧（1–4 min 节律 → 6–24 样本/周期）；管径均值/方差、分支数、总管长、图论指标（节点/边/圈数）、前 3 个图像 POD 模态。</li>
+<li><b>对齐</b>：相机与 ADC 同一时基；插值到 10 s 帧；丢弃首尾 5% 滤波边缘；标准化。</li>
+</ul>
+
+<h3>6.2 E1 指标与判据</h3>
+<table>
+<tr><th>指标</th><th>计算</th><th>预注册判据</th></tr>
+<tr><td>有效维数 PR</td><td>联合 [E, G] 的 SVD；PR + 90/95% 能量</td><td>PR ≤ 2 → L1；3–5 → L2；&gt;5 → 先查 CCA/电极，不直接加模型</td></tr>
+<tr><td>共享模态 CCA 秩</td><td>E（延迟嵌入）× G 的典型相关；代理阈值</td><td>CCA 秩 &lt;&lt; PR → 观测瓶颈，先加电极/几何，不加模型</td></tr>
+<tr><td>非线性</td><td>滞后 k 处线性 vs 二次；代理 p</td><td>p &lt; 0.05 且样本外 ΔR² ≥ 预注册阈值 → L3</td></tr>
+<tr><td>平稳性</td><td>4×12 h 窗口系数；块 bootstrap</td><td>p &lt; 0.05 → L4；否则全局模型</td></tr>
+<tr><td>N_eff</td><td>最慢 G 模态的积分自相关</td><td>&lt; 10 → 参数 ≤ 2–3；延长记录或增强扰动</td></tr>
+<tr><td>BIC 阶梯</td><td>ARX(p,q) 线性/二次；最低 BIC</td><td>只作预测记忆诊断；滞后由互相关/CCM 给出</td></tr>
+</table>
+
+<h3>6.3 决策与停止规则</h3>
+<ol>
+<li><b>9 皿先做 E1，不拟合耦合模型</b>；每皿独立算 PR/CCA/非线性/平稳性，看跨皿分布。</li>
+<li><b>跨皿不变性</b>：b、τ、非线性/平稳性标志至少在 2/3 皿上同向；否则先查测量/对照，不写模型。</li>
+<li><b>若 PR 低、非线性/平稳性不拒绝</b> → L1 的 2–4 参数模型；预注册 b、τ 的符号/范围；用相位随机化代理检验 b ≠ 0。</li>
+<li><b>若 CCA 秩远小于 PR</b> → 先加观测模态（更多电极、几何/流动），不靠潜空间“补”。</li>
+<li><b>若平稳性 p &lt; 0.05</b> → 分段/时变模型；报告 change-point 与窗口敏感性；不要用全局模型掩盖。</li>
+<li><b>若所有检验都欠功效</b> → 延长记录、增强扰动、增加皿数；<b>不</b>用更复杂的模型补偿。</li>
+</ol>
+
+<div class="warn">
+<b>停止规则（kill criteria）</b>：若 3 个月 / 9 皿内，L1 的 b 不能稳定检出，或 CCA 秩始终 ≤1 且增加电极/几何也无改善，则转 B 线（方法/工具论文）或材料计量；不把“潜空间很复杂”当作继续的理由。
+</div>
+
+<h2 class="pb">7. 今日产物与复现</h2>
+
+<table>
+<tr><th style="width:42%">产物</th><th>路径 / 说明</th></tr>
+<tr><td>R1 方法笔记（1 页）</td><td><span class="mono">notes/physarum-r1-latent-method-2026-11-14.md</span></td></tr>
+<tr><td>R1 代码</td><td><span class="mono">physarum-lab/sim/r1_latent_recovery.py</span></td></tr>
+<tr><td>R1 证据</td><td><span class="mono">sim/results/r1_latent_recovery/</span>、<span class="mono">r1_clean_control/</span>、<span class="mono">_r1_pilot_rho05_07/</span></td></tr>
+<tr><td>E1 代码</td><td><span class="mono">physarum-lab/sim/e1_effective_complexity.py</span></td></tr>
+<tr><td>E1 证据</td><td><span class="mono">sim/results/e1_effective_complexity/</span>（JSON/CSV/图/摘要/SHA256SUMS）</td></tr>
+<tr><td>本文 PDF</td><td><span class="mono">physarum-lab/docs/modeling-methods-tools-2026-11-14.pdf</span></td></tr>
+</table>
+
+<h3>7.1 本机代码地图</h3>
+<table>
+<tr><th style="width:38%">路径</th><th>内容</th></tr>
+<tr><td><span class="mono">sim/truth.py</span></td><td>S0 真值模型：慢结构 OU + 电活动包络 + 延迟耦合 + 驱动低通</td></tr>
+<tr><td><span class="mono">sim/instrument.py</span></td><td>电极/ADC 正向模型：分压、半电池、漂移、1/f、热噪声、量化、工频</td></tr>
+<tr><td><span class="mono">sim/pipeline.py</span></td><td>带通/Hilbert 包络、互相关、相位随机化、块 bootstrap、周期折叠</td></tr>
+<tr><td><span class="mono">sim/r1_latent_recovery.py</span></td><td>R1：延迟嵌入 + DMDc/ARX + 代理；对照 S0 互相关</td></tr>
+<tr><td><span class="mono">sim/e1_effective_complexity.py</span></td><td>E1：PR、CCA、非线性、平稳性、N_eff、BIC 阶梯；合成校准 + 真实数据协议</td></tr>
+<tr><td><span class="mono">sim/results/r1_latent_recovery/</span></td><td>R1 主网格证据（JSON/CSV/图/摘要/SHA256SUMS）</td></tr>
+<tr><td><span class="mono">sim/results/e1_effective_complexity/</span></td><td>E1 校准证据（6 类系统 × 20 seeds）</td></tr>
+</table>
+
+<pre>cd physarum-lab/sim
+python3 r1_latent_recovery.py --outdir results/r1_latent_recovery --n-sims 30 --n-surr 50
+python3 r1_latent_recovery.py --outdir results/r1_clean_control --n-sims 30 --n-surr 50 --clean --rho-grid 0.0,0.2,0.3,1.0
+python3 r1_latent_recovery.py --outdir results/_r1_pilot_rho05_07 --n-sims 10 --n-surr 50 --rho-grid 0.5,0.7
+python3 e1_effective_complexity.py --outdir results/e1_effective_complexity --n-sims 20 --n-surr 30</pre>
+
+<div class="box">
+<b>一句话收尾</b>：先测有效复杂度，再选模型；模型复杂度必须远小于世界的复杂度。R1 表明“潜空间预测”在这个 regime 没有资格；E1 表明“数据支持多简单的模型”。下一步不是加模型，而是把 E1 跑到真实数据上。
+</div>
+
+<p class="footer">黏菌项目 · 建模方法与工具 · 2026-11-14 · 所有数字为 computed（模型内）；rho 是模型参数，不是生物学测量。证据以各目录 SHA256SUMS 为准。</p>
+
+</body>
+</html>

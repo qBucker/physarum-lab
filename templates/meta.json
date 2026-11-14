@@ -1,0 +1,48 @@
+{
+  "run_id": "",
+  "label": "",
+  "date": "",
+  "operator": "",
+  "organism": {
+    "strain": "Physarum polycephalum",
+    "source": "",
+    "inoculation_date": ""
+  },
+  "plate": {
+    "diameter_mm": 90,
+    "agar_batch": "",
+    "agar_pct": 1.5,
+    "food_positions": [],
+    "food_type": "oats"
+  },
+  "electrodes": {
+    "type": "copper tape + agar-KCl bridge",
+    "separation_mm": null,
+    "contact_notes": ""
+  },
+  "signal_chain": {
+    "frontend": "ADS1299 (BCIkit M1), internal VREF 4.5 V",
+    "adc": "ADS1299",
+    "gain": 24,
+    "vref_mV": 4500,
+    "full_scale_mV": 187.5,
+    "lsb_nV": 22.35,
+    "sample_rate_sps": 250,
+    "mode": "diff",
+    "input_network": "vendor analog harness; electrode pair on channel 1 INP/INN; internal BIAS enabled",
+    "protection": "none on board; keep half-cell potentials within +/-187.5 mV"
+  },
+  "environment": {
+    "temperature_C": null,
+    "humidity_pct": null,
+    "light": "dark",
+    "notes": ""
+  },
+  "recording": {
+    "start_iso": "",
+    "end_iso": "",
+    "camera_interval_s": 10,
+    "sync_method": "start/stop event + clock card; sample-counter time base (no host marker GPIO)"
+  },
+  "notes": ""
+}

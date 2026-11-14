@@ -1,0 +1,81 @@
+{
+  "label": "T2_test",
+  "note": "internal test signal, 0.9766 Hz, 1x amplitude, gain 24, single board, twisted GND+CLK",
+  "mode": "test",
+  "rate_sps": 250,
+  "channels": "0xFF",
+  "port": "/dev/ttyUSB0",
+  "baud": 115200,
+  "gain": 24,
+  "started_at_utc": "2026-11-11T12:04:34.055+00:00",
+  "elapsed_s": 120.32451558113098,
+  "frames": 28793,
+  "effective_sps": 239.29454326858104,
+  "host": "workstation",
+  "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "firmware_commands": {
+    "stop": "OK stopped",
+    "boards 1": "OK board count applied",
+    "rate 250": "OK rate applied",
+    "channels 0xFF": "OK channel mask applied",
+    "mode test": "OK mode applied",
+    "output openbci": "OK output OpenBCI Cyton 8ch",
+    "info": "device=BCIKit-AFE8 host=ESP32-DevKitC firmware=0.7.16 protocol=1 id=00002C0D7DBD2A58\ncapabilities=bcikit_raw_v1,openbci_cyton_8ch,binary_control,wifi_tcp_udp_ssdp,wifi_bcikit_control,auto_protocol_session,ble_bcikit_stream,ble_bcikit_control,250_500_sps,1_4_boards,channel_mask,uniform_pga_gain,test,short",
+    "status": "state=READY output=openbci profile=internal_test rate=250 boards=1 channels=8 mask=0xFF\nads_id=0x3E register_verified=yes clk_requested=2048000 clk_api=2048000\ndrdy=311369 frames=311314 sync_error=1 spi_error=0 timeout=1953 queue_overrun=0 transport_drop=11273 verify_error=0\nwifi_ssid=OpenBCI-0D2D wifi_ip=192.168.4.1 wifi_protocol=0 wifi_session=none wifi_target=none\nble_name=BCIKit-2A58 ble_connected=no ble_mtu=0 ble_payload=20 ble_interval=0.00ms"
+  },
+  "channel_stats_counts": {
+    "ch1": {
+      "mean_counts": 17875.594623693258,
+      "std_counts": 81239.9605498537,
+      "min_counts": -84744,
+      "max_counts": 82694
+    },
+    "ch2": {
+      "mean_counts": 17481.514118014795,
+      "std_counts": 81224.99229808479,
+      "min_counts": -85121,
+      "max_counts": 82289
+    },
+    "ch3": {
+      "mean_counts": 17869.401104435106,
+      "std_counts": 81333.47293249962,
+      "min_counts": -84869,
+      "max_counts": 82759
+    },
+    "ch4": {
+      "mean_counts": 17398.131802868753,
+      "std_counts": 81321.69517208476,
+      "min_counts": -85329,
+      "max_counts": 82279
+    },
+    "ch5": {
+      "mean_counts": 17843.439620741152,
+      "std_counts": 81208.66484080101,
+      "min_counts": -84737,
+      "max_counts": 82637
+    },
+    "ch6": {
+      "mean_counts": 17529.206369603722,
+      "std_counts": 81270.49230195404,
+      "min_counts": -85133,
+      "max_counts": 82371
+    },
+    "ch7": {
+      "mean_counts": 17631.12635015455,
+      "std_counts": 81316.05837816173,
+      "min_counts": -85087,
+      "max_counts": 82510
+    },
+    "ch8": {
+      "mean_counts": 17857.129475914284,
+      "std_counts": 81352.07648408705,
+      "min_counts": -84904,
+      "max_counts": 82766
+    }
+  },
+  "notes": [
+    "Counts are raw ADS1299 24-bit values at gain 24.",
+    "LSB at gain 24, VREF 4.5 V: 2*4.5/(24*2^23) = 4.470e-8 V.",
+    "OpenBCI packets omit the ADS1299 status word and DRDY timestamp."
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "script": "e1_effective_complexity.py",
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "numpy": "2.5.3",
+  "args": {
+    "outdir": "results/e1_effective_complexity",
+    "n_sims": 20,
+    "n_surr": 30,
+    "systems": "s0,kmode2,kmode4,kmode8,nonlinear,nonstationary"
+  },
+  "constants": {
+    "DURATION_H": 48.0,
+    "FRAME_DT": 10.0,
+    "N": 17280,
+    "TAU_S": 7200.0,
+    "TAU_E": 1800.0,
+    "LAG_S": 600.0,
+    "RHO": 0.3,
+    "SIGMA_OBS": 0.3,
+    "N_SIMS": 20,
+    "N_SURR": 30,
+    "P_GRID": [
+      1,
+      2,
+      4
+    ],
+    "Q_GRID": [
+      1,
+      4,
+      16,
+      60
+    ],
+    "TRAIN_FRAC": 0.7,
+    "N_WINDOWS": 4
+  }
+}

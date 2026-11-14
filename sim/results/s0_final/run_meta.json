@@ -1,0 +1,19 @@
+{
+  "argv": {
+    "quick": false,
+    "n_sims": 40,
+    "n_surr": 200,
+    "outdir": "results/s0_final",
+    "base_seed": 42,
+    "signal_model": "am",
+    "tau_s": 2.0,
+    "drive_period": 2.0,
+    "drive_amp": 2.0
+  },
+  "outputs": {
+    "s0_power.json": "e98180ca7ea0e69836ecde533269e78dbbc399f3852d9b9804f0467469eb3d76",
+    "s0_power.csv": "7d296bd7d46efee60b0ba1d5ad55b4061daf526ef22c237875d81f58c64d8a69",
+    "s0_power.png": "22f57d64b8a273683bd4fbac24e176f8e749046d019f4eca8a7294a22394c7ba",
+    "s0_requirements.md": "8af4e083a9bb8a7a223f48822d392576f99fba1bac6d9111b25a543cf3ecef73"
+  }
+}

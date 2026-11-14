@@ -1,0 +1,7 @@
+# Read over UART after the 2 h soak (2026-11-12 ~22:49 CST), device idle.
+# Compare with the start status in meta.json (firmware_commands.status).
+state=READY output=openbci profile=input_short rate=250 boards=1 channels=8 mask=0xFF
+ads_id=0x3E register_verified=yes clk_requested=2048000 clk_api=2048000
+drdy=2020258 frames=2020215 sync_error=9 spi_error=0 timeout=6308 queue_overrun=0 transport_drop=4254 verify_error=0
+wifi_ssid=OpenBCI-0D2D wifi_ip=192.168.4.1 wifi_protocol=0 wifi_session=none wifi_target=none
+ble_name=BCIKit-2A58 ble_connected=no ble_mtu=0 ble_payload=20 ble_interval=0.00ms
