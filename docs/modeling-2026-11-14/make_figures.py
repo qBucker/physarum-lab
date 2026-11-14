@@ -179,8 +179,43 @@ def s1_figure():
     plt.close(fig)
 
 
+def s1b_figure():
+    data = json.load(open(
+        BASE / "sim/results/s1b_direct_baseline/s1b_results.json"))
+    summary = data["primary"]["summary"]
+    specs = [
+        ("s1l2", "S1-L2\nPC+POD", VIOLET),
+        ("dqa", "DQ-A\nraw+region", ORANGE),
+        ("dqc", "DQ-C\nraw+POD", BLUE),
+        ("dqd", "DQ-D\nPC+region", AQUA),
+    ]
+    x = range(len(specs))
+    fig, axes = plt.subplots(1, 2, figsize=(7.6, 3.5), dpi=200, sharey=True)
+    for ax, key, title in ((axes[0], "quadratic|0.9", "二次格（主检验）"),
+                           (axes[1], "linear|0.9", "线性格（特异性）")):
+        ys = [summary[key][det]["power"] for det, _, _ in specs]
+        ax.bar(x, ys, color=[c for _, _, c in specs], width=0.65)
+        for xi, y in zip(x, ys):
+            ax.text(xi, y + 0.03, f"{y:.2f}", ha="center", va="bottom",
+                    color=MUTED, fontproperties=FONT, fontsize=8)
+        ax.set_xticks(list(x))
+        ax.set_xticklabels([label for _, label, _ in specs], fontsize=8)
+        ax.set_ylim(0, 1.1)
+        ax.set_title(title, fontproperties=FONT, fontsize=10, loc="left")
+        ax.grid(alpha=0.25, color=GRID, axis="y")
+        ax.set_axisbelow(True)
+        for spine in ("top", "right"):
+            ax.spines[spine].set_visible(False)
+    axes[0].set_ylabel("检出率（p < 0.05）", fontproperties=FONT)
+    fig.tight_layout()
+    fig.savefig(OUT / "fig_s1b.png")
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     r1_figure()
     e1_figure()
     s1_figure()
-    print("wrote", OUT / "fig_r1.png", OUT / "fig_e1.png", OUT / "fig_s1.png")
+    s1b_figure()
+    print("wrote", OUT / "fig_r1.png", OUT / "fig_e1.png", OUT / "fig_s1.png",
+          OUT / "fig_s1b.png")
