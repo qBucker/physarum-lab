@@ -50,7 +50,7 @@ intermittent register read-back failures (`CONFIG1 expected 0x46 actual 0x06`).
 | `firmware/` | ADS1256 / ADS1115 logger sketches (fallback path; hardware not purchased) |
 | `templates/` | metadata and prediction-card templates |
 | `data/` | measured bench acquisitions (Git LFS) and per-run analysis |
-| `sim/` | S0/R1/E1/S1 digital-twin and testbed code, plus computed evidence |
+| `sim/` | S0/R1/E1/S1/S1b digital-twin and testbed code, plus computed evidence |
 | `docs/modeling-2026-11-14/` | modeling methods and tools report (Chinese HTML) |
 | `BOM-from-zero.md` | minimum hardware list and wiring |
 | `DATA.md` | data inventory, LFS instructions, evidence status |
@@ -81,17 +81,20 @@ report, and pilot/superseded simulation outputs are not published. See
 | S0 | can a structure–electrical coupling be detected above instrument noise? | ADC noise is not the bottleneck; electrode 1/f and input impedance are. A drive period ≳ 4 × structural time is required; 48 h at a 2 h structural time is underpowered at realistic coupling. |
 | R1 | does a delay-embedded latent pipeline beat direct lagged correlation? | No gain at realistic coupling; direct lagged cross-correlation/CCM is the primary detector. The latent model only works near deterministic coupling. |
 | E1 | how complex a model does the data support? | POD participation ratio recovers known dimension; nonlinearity test power 0.55; stationarity test power 0.40; N_eff ≈ 16 over 48 h. Start with a 2–4 parameter lagged linear model. |
-| S1 | does geometric POD plus a nonlinear latent layer earn its keep on a high-dimensional nonlinear network? | At rho = 0.9 with quadratic coupling: D1/D2 power 0.13/0.23, L1/L2 0.63/0.77; L2 is 0.0 in the linear cell (specific); FPR 0.017–0.033. Pre-registered verdict: the nonlinear latent layer adds value in this testbed. R1's linear-latent no-gain result stands. |
+| S1 / S1b | Does geometric POD plus a nonlinear latent layer beat direct detectors on a high-dimensional nonlinear network? | At rho = 0.9 quadratic, S1-L2 (POD/PCA) 0.77 vs direct linear 0.13/0.23. The direct nonlinear baseline DQ-A (16 raw electrodes × 8 region means, same quadratic library) reaches 0.93 (matched 0.967 vs 0.867); all detectors are 0.0 in the linear cell. S1b verdict: the gain is the quadratic lagged features, not the latent POD/PCA representation. R1's linear-latent no-gain result stands. |
 
 S1 uses a stationary log-homeostatic Tero–Kobayashi network, a 24 × 20 camera
 POD, 8/16/32-electrode lead fields, and a partial delayed-gain statistic at a
 600 s lag. The latent detectors use the pre-registered lag; the fixed-lag
 direct baselines at the same lag are D1f/D2f = 0.13/0.33 at rho = 0.9, still
-below L2 = 0.77. Result details: `sim/results/s1_network/s1_summary.md`.
-The comparison is against direct **linear** detectors; a direct nonlinear
-baseline using the same quadratic library on raw observations is the next
-control (S1b), so the current verdict does not establish an advantage over
-that baseline. It is a testbed, not a biological claim.
+below L2 = 0.77. S1b then ran the missing control: the direct nonlinear
+baseline DQ-A (16 raw electrode channels × 8 region means, same quadratic
+library and estimator) reaches 0.93 (matched 0.967) vs S1-L2 0.77 (0.867);
+all detectors are 0.0 in the linear cell, so the comparison is specific to
+the quadratic cell. Verdict: the gain is the quadratic lagged features, not
+the POD/PCA latent representation. Results: `sim/results/s1_network/` and
+`sim/results/s1b_direct_baseline/s1b_summary.md`. It is a testbed, not a
+biological claim.
 
 ## Quick start
 
@@ -105,6 +108,10 @@ python3 host/bench_test.py data/bench_T1/samples.csv --label T1 --max-noise-uv 5
 # S1 testbed (after cloning; ~30 min for the full grid)
 cd sim && OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 \
     python3 s1_network_testbed.py --grid all --outdir results/s1_network
+
+# S1b direct nonlinear baseline (~18 min)
+cd sim && OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 \
+    python3 s1b_direct_baseline.py --grid all --outdir results/s1b_direct_baseline
 ```
 
 Requirements: Python 3.11+, `numpy`, `scipy`, `matplotlib`, and `pyserial`

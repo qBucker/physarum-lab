@@ -33,7 +33,8 @@ per-run `ANALYSIS.md`; the scripts that regenerate them are in `host/`.
 | `sim/results/s0_design_spont/`, `s0_design_v4/` | S0 design sweeps (computed) |
 | `sim/results/r1_latent_recovery/`, `r1_clean_control/` | R1 latent-pipeline recovery test (computed) |
 | `sim/results/e1_effective_complexity/` | E1 effective-complexity calibration (computed) |
-| `sim/results/s1_network/` | S1 high-dimensional/nonlinear network testbed (computed); verdict: nonlinear latent layer adds value, linear latent layer does not |
+| `sim/results/s1_network/` | S1 high-dimensional/nonlinear testbed (computed); S1-L2 beats direct linear detectors |
+| `sim/results/s1b_direct_baseline/` | S1b direct nonlinear baseline (computed); verdict: quadratic lagged features explain the gain, no latent-representation advantage |
 | `sim/results/instrument_budget.md` | static instrument budget (computed, assumed parameters) |
 
 Pilot, superseded, and internal simulation outputs are excluded from the

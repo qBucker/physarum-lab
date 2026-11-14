@@ -16,6 +16,7 @@
 | `r1_latent_recovery.py` | R1：潜空间管线回收测试（延迟嵌入 + DMDc/ARX + 代理），对照 S0 互相关检测器 |
 | `e1_effective_complexity.py` | E1：有效复杂度校准（PR、CCA、非线性、平稳性、N_eff、BIC 阶梯）与真实数据协议 |
 | `s1_network_testbed.py` | S1：高维/非线性网络测试床（平稳对数电导 TK、相机 POD、8–32 电极 lead-field、偏滞后线性/二次增益、匹配 FPR） |
+| `s1b_direct_baseline.py` | S1b：直接非线性基线（原始电极 × 区域几何 + 同一二次库；2×2 分解；匹配 FPR） |
 
 ## 跑
 
@@ -67,15 +68,19 @@ max-|r| 互相关仍是正确检测器。结果 `results/r1_latent_recovery/`、
 `notes/physarum-e1-effective-complexity-2026-11-14.md`；方法与工具 PDF
 `docs/modeling-methods-tools-2026-11-14.pdf`。
 
-## S1（2026-11-14）
+## S1 / S1b（2026-11-14）
 
-高维/非线性测试床：平稳对数电导 TK（12 节点、约 24 边）→ 24×20 相机图像 + POD → 16 电极 lead-field → 0.03 Hz 载波与仪器噪声。预注册 `rho={0,0.5,0.7,0.9}` × `{linear, quadratic}` × 30 次；检测器 = D1/D2（扫描/固定滞后）、L1（偏滞后线性增益）、L2（偏滞后二次增益）；全样本 R² 由共同相位代理校准，匹配 FPR。
+高维/非线性测试床：平稳对数电导 TK（12 节点、约 24 边）→ 24×20 相机图像 + POD → 16 电极 lead-field → 0.03 Hz 载波与仪器噪声。预注册 `rho={0,0.5,0.7,0.9}` × `{linear, quadratic}` × 30 次；检测器 = D1/D2（扫描/固定滞后）、S1-L1（偏滞后线性增益）、S1-L2（偏滞后二次增益）；全样本 R² 由共同相位代理校准，匹配 FPR。
 
-结果（computed）：rho=0.9 二次格 D1/D2 = 4/30、7/30，L1/L2 = 19/30、23/30；L2 在线性格 0/30（特异）；FPR 1/60；匹配阈值后 L2 = 0.867 vs D2 = 0.567；K=8/32 次网格同向。**裁决：非线性潜层有增益；R1 的“线性潜层无增益”结论不变。** 对照是直接线性检测器；同一二次库直接作用于原始观测的直接非线性基线是 S1b 的下一步控制，本裁决尚未覆盖该对照。证据 `results/s1_network/`（`s1_summary.md`、`s1_results.json`、CSV、PNG、`SHA256SUMS`；两个 exemplar 不随公开仓发布，可用脚本重生成）。
+S1 结果（对直接线性）：rho=0.9 二次格 D1/D2 = 4/30、7/30，S1-L1/S1-L2 = 19/30、23/30；S1-L2 线性格 0/30（特异）；FPR 1/60；匹配阈值后 L2 = 0.867 vs D2 = 0.567；K=8/32 次网格同向。**（仅对直接线性检测器）非线性潜层有增益；R1 的线性结论不变。**
+
+S1b 直接非线性基线（同日）：DQ-A = 16 原始电极 × 8 区域几何均值（4×2）+ 同一二次库/估计器；DQ-C/D 分解电极 PCA 与几何 POD。rho=0.9 二次格：DQ-A 28/30（0.933；匹配 0.967），S1-L2 23/30（0.767；0.867）；DQ-C 0.900、DQ-D 0.900；四个检测器线性格全 0；FPR DQ-A 0/60；S1 参考 p 差 0.0（120/120）。**裁决：QUADRATIC FEATURES EXPLAIN THE GAIN——增益来自二次滞后特征，POD/PCA 潜层表示无独立优势；主非线性检测器改为直接二次滞后模型。** 证据 `results/s1_network/`、`results/s1b_direct_baseline/`。
 
 ```bash
 OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 \
     python3 s1_network_testbed.py --grid all --outdir results/s1_network
+OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 \
+    python3 s1b_direct_baseline.py --grid all --outdir results/s1b_direct_baseline
 ```
 
 ## 纪律

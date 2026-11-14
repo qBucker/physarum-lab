@@ -1,0 +1,37 @@
+{
+  "script": "s1b_direct_baseline.py",
+  "script_sha256": "340426c4d35a380204181a04450fc8620af837dfe72bac4513dd8e856c1a9b12",
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "numpy": "2.5.3",
+  "args": {
+    "outdir": "results/s1b_direct_baseline",
+    "grid": "all",
+    "n_sims": 30,
+    "n_surr": 50,
+    "pilot": false
+  },
+  "runtime_s": 1041.7009327411652,
+  "constants": {
+    "RHO_PRIMARY": 0.9,
+    "N_SIMS": 30,
+    "N_SURR": 50,
+    "ALPHA": 0.05,
+    "SIGNAL_UV": 100.0,
+    "CAMERA_NOISE": 0.03,
+    "REGION_GRID": [
+      4,
+      2
+    ],
+    "DETECTORS": [
+      "s1l2",
+      "dqa",
+      "dqc",
+      "dqd"
+    ],
+    "FPR_LO": 0.02,
+    "FPR_HI": 0.1,
+    "MARGIN_KEEP": 0.2,
+    "MARGIN_DIRECT": 0.1
+  },
+  "postprocess_note": "s1b_power.png was replotted with English labels after the run; JSON/CSV/computation unchanged."
+}
