@@ -182,7 +182,8 @@ The one late-run host stall is the only significant deviation.
 
 1. T3–T5 (electrode/agar drift) when materials are available; then the 3-dish
    pilot.
-2. Add a sequence-gap watchdog: alert on a sample-number step > 2 or on a
+2. Sequence-gap watchdog (implemented 2026-11-27 in
+   `run_scripts/watchdog.py`): alerts on a sample-number step > 2 or on a
    host timestamp gap > 1 s, instead of only on 5 min of no file growth.
 3. For runs that need unambiguous gap accounting, use BCIKit native WiFi
    frames (32-bit sequence/timestamps) or periodically reconcile the device
