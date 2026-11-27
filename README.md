@@ -39,8 +39,9 @@ ADS1299 or the ESP32 firmware**: device counters show
 received 37,433 fewer frames (2.10%). The same board over a Windows native
 COM port lost 0.0031% in 30 min, 0.00258% in 2 h with the streaming
 recorder, and 0.00234% in 48 h (0.00833% under the more conservative
-device-frame reconciliation), 500–680× less than the usbipd/WSL path. The
-streaming recorder keeps constant memory (RSS 21–22 MB) over the full 48 h.
+device-frame reconciliation), roughly 250–900× less than the usbipd/WSL
+path. The streaming recorder keeps constant memory (RSS 21–22 MB) over the
+full 48 h.
 
 A known wiring constraint: the 2.048 MHz clock return path needs a ground
 return; twisting GND and CLK is required. A single ground produced
