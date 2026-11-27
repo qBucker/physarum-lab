@@ -3,7 +3,8 @@
 
 Records the vendor firmware's OpenBCI 33-byte packets at 250 SPS over the
 ESP32 UART, writes the raw byte stream, a parsed CSV, meta.json and
-SHA256SUMS.
+SHA256SUMS. The recorder streams raw.bin to disk and keeps online channel
+statistics, so memory stays constant for multi-hour runs.
 
 Usage:
     python3 host/bcikit_openbci.py --port /dev/ttyUSB0 --mode short \
@@ -21,9 +22,9 @@ Notes:
 import argparse
 import hashlib
 import json
+import math
 import os
 import platform
-import statistics
 import sys
 import time
 from datetime import datetime, timezone
@@ -66,13 +67,18 @@ def configure(ser, mode, rate, channels):
     return log
 
 
-def iter_frames(ser, deadline, raw_chunks):
-    """Yield complete 33-byte frames, resynchronising on A0..C0."""
+def iter_frames(ser, deadline, on_chunk=None):
+    """Yield complete 33-byte frames, resynchronising on A0..C0.
+
+    Every serial chunk is passed to ``on_chunk`` exactly as received, so the
+    caller can stream the raw byte log to disk without retaining it.
+    """
     buf = bytearray()
     while time.time() < deadline:
         chunk = ser.read(4096)
         if chunk:
-            raw_chunks.append(chunk)
+            if on_chunk is not None:
+                on_chunk(chunk)
             buf.extend(chunk)
             while True:
                 if len(buf) < PACKET_BYTES:
@@ -101,6 +107,42 @@ def parse_frame(frame):
     return sample, values
 
 
+class ChannelStats:
+    """Online per-channel mean, population std, min and max (Welford)."""
+
+    def __init__(self, n_channels=8):
+        self.n = 0
+        self.mean = [0.0] * n_channels
+        self.m2 = [0.0] * n_channels
+        self.vmin = [None] * n_channels
+        self.vmax = [None] * n_channels
+
+    def update(self, values):
+        self.n += 1
+        n = self.n
+        for i, v in enumerate(values):
+            delta = v - self.mean[i]
+            self.mean[i] += delta / n
+            self.m2[i] += delta * (v - self.mean[i])
+            if self.vmin[i] is None or v < self.vmin[i]:
+                self.vmin[i] = v
+            if self.vmax[i] is None or v > self.vmax[i]:
+                self.vmax[i] = v
+
+    def summary_counts(self):
+        out = {}
+        if self.n == 0:
+            return out
+        for i in range(len(self.mean)):
+            out[f"ch{i + 1}"] = {
+                "mean_counts": self.mean[i],
+                "std_counts": math.sqrt(max(self.m2[i] / self.n, 0.0)),
+                "min_counts": self.vmin[i],
+                "max_counts": self.vmax[i],
+            }
+        return out
+
+
 def sha256_file(path):
     h = hashlib.sha256()
     with open(path, "rb") as fh:
@@ -122,6 +164,8 @@ def main():
     ap.add_argument("--outdir", required=True)
     ap.add_argument("--label", default="")
     ap.add_argument("--note", default="")
+    ap.add_argument("--progress-every", type=float, default=60.0,
+                    help="seconds between progress lines; 0 disables")
     args = ap.parse_args()
 
     if args.rate != 250:
@@ -135,56 +179,67 @@ def main():
 
     # A short timeout is required: the USB/IP serial link delivers data in
     # small bursts, and a long timeout lets the kernel tty buffer overflow.
-    ser = serial.Serial(args.port, args.baud, timeout=0.01)
+    ser = serial.Serial(args.port, args.baud, timeout=0.01,
+                        dsrdtr=False, rtscts=False)
     started_at = utc_now()
+
+    # Opening a Windows COM port toggles DTR/RTS and resets the ESP32.
+    # Wait for the firmware to boot before configuring or reading status.
+    time.sleep(1.5)
+    ser.reset_input_buffer()
 
     setup_log = configure(ser, args.mode, args.rate, args.channels)
 
-    raw_chunks = []
-    samples = []
+    channel_stats = ChannelStats()
+    frame_count = 0
+    run_error = None
     ser.reset_input_buffer()
     ser.write(b"start\n")
     time.sleep(0.5)
     ser.read(8192)
     t_start = time.time()
     deadline = t_start + args.duration if args.duration > 0 else float("inf")
+    end_status = ""
+    last_progress = t_start
 
+    raw_fh = open(raw_path, "wb")
     try:
         with open(csv_path, "w") as csv:
             csv.write("host_time_iso,host_unix,sample_number," +
                       ",".join(f"ch{i + 1}" for i in range(8)) + "\n")
-            for frame in iter_frames(ser, deadline, raw_chunks):
+            for frame in iter_frames(ser, deadline, raw_fh.write):
                 sample, values = parse_frame(frame)
                 now = time.time()
                 csv.write(f"{utc_now()},{now:.6f},{sample}," +
                           ",".join(str(v) for v in values) + "\n")
-                samples.append(values)
+                channel_stats.update(values)
+                frame_count += 1
+                if args.progress_every > 0 and now - last_progress >= args.progress_every:
+                    elapsed_now = now - t_start
+                    print(f"progress frames={frame_count} "
+                          f"elapsed={elapsed_now:.0f}s "
+                          f"sps={frame_count / elapsed_now:.2f}", flush=True)
+                    raw_fh.flush()
+                    last_progress = now
     except KeyboardInterrupt:
         pass
+    except Exception as exc:
+        run_error = f"{type(exc).__name__}: {exc}"
+        print(f"run error: {run_error}", file=sys.stderr, flush=True)
     finally:
         try:
             ser.write(b"s")
             time.sleep(0.3)
             ser.read(4096)
+            end_status = send_command(ser, "status", 0.8)
         except Exception:
             pass
         ser.close()
+        raw_fh.flush()
+        raw_fh.close()
 
     elapsed = time.time() - t_start
-    with open(raw_path, "wb") as fh:
-        for chunk in raw_chunks:
-            fh.write(chunk)
-
-    stats = {}
-    if samples:
-        for i in range(8):
-            col = [row[i] for row in samples]
-            stats[f"ch{i + 1}"] = {
-                "mean_counts": statistics.mean(col),
-                "std_counts": statistics.pstdev(col),
-                "min_counts": min(col),
-                "max_counts": max(col),
-            }
+    stats_counts = channel_stats.summary_counts()
 
     meta = {
         "label": args.label,
@@ -197,17 +252,22 @@ def main():
         "gain": 24,
         "started_at_utc": started_at,
         "elapsed_s": elapsed,
-        "frames": len(samples),
-        "effective_sps": (len(samples) / elapsed) if elapsed > 0 else None,
+        "frames": frame_count,
+        "effective_sps": (frame_count / elapsed) if elapsed > 0 else None,
         "host": platform.node(),
         "platform": platform.platform(),
         "firmware_commands": setup_log,
-        "channel_stats_counts": stats,
+        "device_status_start": setup_log.get("status", ""),
+        "device_status_end": end_status,
+        "channel_stats_counts": stats_counts,
+        "run_error": run_error,
         "notes": [
             "Counts are raw ADS1299 24-bit values at gain 24.",
             "LSB at gain 24, VREF 4.5 V: 4.5/(24*2^23) = 2.235e-8 V.",
             "Full scale at gain 24: +/-4.5/24 = +/-187.5 mV.",
             "OpenBCI packets omit the ADS1299 status word and DRDY timestamp.",
+            "Recorder streams raw.bin and keeps online channel statistics; "
+            "memory is constant during the run.",
         ],
     }
     with open(meta_path, "w") as fh:
@@ -220,10 +280,10 @@ def main():
     with open(os.path.join(args.outdir, "SHA256SUMS"), "w") as fh:
         fh.write("\n".join(sums) + "\n")
 
-    print(f"frames={len(samples)} elapsed={elapsed:.1f}s "
-          f"effective_sps={len(samples) / elapsed if elapsed else 0:.2f}")
+    print(f"frames={frame_count} elapsed={elapsed:.1f}s "
+          f"effective_sps={frame_count / elapsed if elapsed else 0:.2f}")
     for i in range(8):
-        s = stats.get(f"ch{i + 1}")
+        s = stats_counts.get(f"ch{i + 1}")
         if s:
             print(f"ch{i + 1}: mean={s['mean_counts']:9.1f} "
                   f"std={s['std_counts']:8.2f} counts")
