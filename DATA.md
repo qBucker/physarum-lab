@@ -16,7 +16,18 @@ git lfs pull
 | `data/bench_T6/` | 600 s shorted input | 19 MB | PASS: 0.169% sequence gaps |
 | `data/bench_T6_soak2h/` | 2 h soak over usbipd/WSL | 217 MB | FAIL overall (2.107% gaps); transport attribution evidence |
 | `data/bench_win_uart_30m/` | 30 min Windows native COM | 56 MB | PASS: 0.0031% gaps |
+| `data/bench_win_uart_2h_2026-11-22/` | 2 h Windows native COM, streaming recorder | 223 MB | PASS: 0.00258% gaps |
+| `data/bench_win_uart_smoke_stream_2026-11-22/` | 60 s streaming-recorder smoke | 2.1 MB | smoke test |
+| `data/bench_win_uart_stream_30m_2026-11-22/` | 30 min streaming validation on a local C: disk | 56 MB | PASS: 0.00157% gaps; RSS 21–22 MB |
+| `data/bench_win_uart_smoke_2026-11-22/` | 30 s post-11-16 recorder smoke | 1.2 MB | smoke test |
+| `data/bench_win_uart_48h_2026-11-24/` | 48 h Windows native COM | 48 KB (metadata and analysis only) | PASS: 0.00234% visible / 0.00833% reconciled |
 | `data/win_uart_partial_2026-11-12/` | 8 min exploratory Windows COM | 12 MB | exploratory; not formal evidence |
+
+The 48 h run produced `raw.bin` (1.413 GB) and `samples.csv` (4.178 GB),
+which are too large for the repository. They remain on the recording host;
+`SHA256SUMS.recorder` in that directory records their hashes and the original
+recorder-side `meta.json`. The directory `SHA256SUMS` covers the files that
+are published.
 
 Every formal run directory contains `meta.json`, `ANALYSIS.md` where
 applicable, and `SHA256SUMS`. The sequence-gap and noise analyses are in the

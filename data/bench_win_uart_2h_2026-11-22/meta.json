@@ -1,0 +1,84 @@
+{
+  "label": "win-uart-2h",
+  "note": "win-uart-2h-post-11-16-recorder",
+  "mode": "short",
+  "rate_sps": 250,
+  "channels": "0xFF",
+  "port": "COM6",
+  "baud": 115200,
+  "gain": 24,
+  "started_at_utc": "2026-11-22T12:56:01.006+00:00",
+  "elapsed_s": 7201.150171041489,
+  "frames": 1784268,
+  "effective_sps": 247.77541887339154,
+  "host": "workstation",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "firmware_commands": {
+    "stop": "BLE ready: name=BCIKit-2A58 service=BCIKit native protocol\nREADY. Type help, or use BCIKit binary control protocol v1.",
+    "boards 1": "OK board count applied",
+    "rate 250": "OK rate applied",
+    "channels 0xFF": "OK channel mask applied",
+    "mode short": "OK mode applied",
+    "output openbci": "OK output OpenBCI Cyton 8ch",
+    "info": "device=BCIKit-AFE8 host=ESP32-DevKitC firmware=0.7.16 protocol=1 id=00002C0D7DBD2A58\ncapabilities=bcikit_raw_v1,openbci_cyton_8ch,binary_control,wifi_tcp_udp_ssdp,wifi_bcikit_control,auto_protocol_session,ble_bcikit_stream,ble_bcikit_control,250_500_sps,1_4_boards,channel_mask,uniform_pga_gain,test,short",
+    "status": "state=READY output=openbci profile=input_short rate=250 boards=1 channels=8 mask=0xFF\nads_id=0x3E register_verified=yes clk_requested=2048000 clk_api=2048000\ndrdy=0 frames=0 sync_error=0 spi_error=0 timeout=0 queue_overrun=0 transport_drop=0 verify_error=0\nwifi_ssid=OpenBCI-0D2D wifi_ip=192.168.4.1 wifi_protocol=0 wifi_session=none wifi_target=none\nble_name=BCIKit-2A58 ble_connected=no ble_mtu=0 ble_payload=20 ble_interval=0.00ms"
+  },
+  "device_status_start": "state=READY output=openbci profile=input_short rate=250 boards=1 channels=8 mask=0xFF\nads_id=0x3E register_verified=yes clk_requested=2048000 clk_api=2048000\ndrdy=0 frames=0 sync_error=0 spi_error=0 timeout=0 queue_overrun=0 transport_drop=0 verify_error=0\nwifi_ssid=OpenBCI-0D2D wifi_ip=192.168.4.1 wifi_protocol=0 wifi_session=none wifi_target=none\nble_name=BCIKit-2A58 ble_connected=no ble_mtu=0 ble_payload=20 ble_interval=0.00ms",
+  "device_status_end": "state=READY output=openbci profile=input_short rate=250 boards=1 channels=8 mask=0xFF\nads_id=0x3E register_verified=yes clk_requested=2048000 clk_api=2048000\ndrdy=1784444 frames=1784438 sync_error=3 spi_error=0 timeout=3934 queue_overrun=0 transport_drop=0 verify_error=0\nwifi_ssid=OpenBCI-0D2D wifi_ip=192.168.4.1 wifi_protocol=0 wifi_session=none wifi_target=none\nble_name=BCIKit-2A58 ble_connected=no ble_mtu=0 ble_payload=20 ble_interval=0.00ms",
+  "channel_stats_counts": {
+    "ch1": {
+      "mean_counts": -937.6224518962398,
+      "std_counts": 27.898988241520726,
+      "min_counts": -3852,
+      "max_counts": 8987
+    },
+    "ch2": {
+      "mean_counts": -1426.407278503005,
+      "std_counts": 35.429258851668926,
+      "min_counts": -14970,
+      "max_counts": 8741
+    },
+    "ch3": {
+      "mean_counts": -790.8610724397904,
+      "std_counts": 37.159855600635396,
+      "min_counts": -4239,
+      "max_counts": 11965
+    },
+    "ch4": {
+      "mean_counts": -1490.9532463733026,
+      "std_counts": 12.17771698824537,
+      "min_counts": -2263,
+      "max_counts": 3702
+    },
+    "ch5": {
+      "mean_counts": -1028.8309676573251,
+      "std_counts": 7.6166026916673655,
+      "min_counts": -1932,
+      "max_counts": 1739
+    },
+    "ch6": {
+      "mean_counts": -1315.0303048645158,
+      "std_counts": 6.852467276229448,
+      "min_counts": -2226,
+      "max_counts": -949
+    },
+    "ch7": {
+      "mean_counts": -1448.293059114438,
+      "std_counts": 6.995722452080495,
+      "min_counts": -2312,
+      "max_counts": -869
+    },
+    "ch8": {
+      "mean_counts": -872.8501032356126,
+      "std_counts": 7.144258583211182,
+      "min_counts": -1746,
+      "max_counts": -144
+    }
+  },
+  "notes": [
+    "Counts are raw ADS1299 24-bit values at gain 24.",
+    "LSB at gain 24, VREF 4.5 V: 4.5/(24*2^23) = 2.235e-8 V.",
+    "Full scale at gain 24: +/-4.5/24 = +/-187.5 mV.",
+    "OpenBCI packets omit the ADS1299 status word and DRDY timestamp."
+  ]
+}

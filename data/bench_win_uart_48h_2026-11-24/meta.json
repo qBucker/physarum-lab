@@ -1,0 +1,86 @@
+{
+  "label": "win-uart-stream-48h-r2",
+  "note": "post-sleep-fix-keepawake-usb-suspend-off",
+  "mode": "short",
+  "rate_sps": 250,
+  "channels": "0xFF",
+  "port": "COM6",
+  "baud": 115200,
+  "gain": 24,
+  "started_at_utc": "2026-11-24T15:19:10.555+00:00",
+  "elapsed_s": 172801.16666340828,
+  "frames": 42820366,
+  "effective_sps": 247.8013709444907,
+  "host": "workstation",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "firmware_commands": {
+    "stop": "BLE ready: name=BCIKit-2A58 service=BCIKit native protocol\nREADY. Type help, or use BCIKit binary control protocol v1.",
+    "boards 1": "OK board count applied",
+    "rate 250": "OK rate applied",
+    "channels 0xFF": "OK channel mask applied",
+    "mode short": "OK mode applied",
+    "output openbci": "OK output OpenBCI Cyton 8ch",
+    "info": "device=BCIKit-AFE8 host=ESP32-DevKitC firmware=0.7.16 protocol=1 id=00002C0D7DBD2A58\ncapabilities=bcikit_raw_v1,openbci_cyton_8ch,binary_control,wifi_tcp_udp_ssdp,wifi_bcikit_control,auto_protocol_session,ble_bcikit_stream,ble_bcikit_control,250_500_sps,1_4_boards,channel_mask,uniform_pga_gain,test,short",
+    "status": "state=READY output=openbci profile=input_short rate=250 boards=1 channels=8 mask=0xFF\nads_id=0x3E register_verified=yes clk_requested=2048000 clk_api=2048000\ndrdy=0 frames=0 sync_error=0 spi_error=0 timeout=0 queue_overrun=0 transport_drop=0 verify_error=0\nwifi_ssid=OpenBCI-0D2D wifi_ip=192.168.4.1 wifi_protocol=0 wifi_session=none wifi_target=none\nble_name=BCIKit-2A58 ble_connected=no ble_mtu=0 ble_payload=20 ble_interval=0.00ms"
+  },
+  "device_status_start": "state=READY output=openbci profile=input_short rate=250 boards=1 channels=8 mask=0xFF\nads_id=0x3E register_verified=yes clk_requested=2048000 clk_api=2048000\ndrdy=0 frames=0 sync_error=0 spi_error=0 timeout=0 queue_overrun=0 transport_drop=0 verify_error=0\nwifi_ssid=OpenBCI-0D2D wifi_ip=192.168.4.1 wifi_protocol=0 wifi_session=none wifi_target=none\nble_name=BCIKit-2A58 ble_connected=no ble_mtu=0 ble_payload=20 ble_interval=0.00ms",
+  "device_status_end": "state=READY output=openbci profile=input_short rate=250 boards=1 channels=8 mask=0xFF\nads_id=0x3E register_verified=yes clk_requested=2048000 clk_api=2048000\ndrdy=42824058 frames=42824053 sync_error=2 spi_error=0 timeout=93899 queue_overrun=0 transport_drop=0 verify_error=0\nwifi_ssid=OpenBCI-0D2D wifi_ip=192.168.4.1 wifi_protocol=0 wifi_session=none wifi_target=none\nble_name=BCIKit-2A58 ble_connected=no ble_mtu=0 ble_payload=20 ble_interval=0.00ms",
+  "channel_stats_counts": {
+    "ch1": {
+      "mean_counts": -937.7977927370246,
+      "std_counts": 6.139708523515453,
+      "min_counts": -972,
+      "max_counts": -903
+    },
+    "ch2": {
+      "mean_counts": -1427.4994792668579,
+      "std_counts": 6.273551421045437,
+      "min_counts": -1469,
+      "max_counts": -1392
+    },
+    "ch3": {
+      "mean_counts": -789.7089984471779,
+      "std_counts": 6.1880674711309505,
+      "min_counts": -824,
+      "max_counts": -757
+    },
+    "ch4": {
+      "mean_counts": -1490.8077438200671,
+      "std_counts": 6.236673588659502,
+      "min_counts": -1524,
+      "max_counts": -1457
+    },
+    "ch5": {
+      "mean_counts": -1028.8674087000268,
+      "std_counts": 6.082840494973881,
+      "min_counts": -1061,
+      "max_counts": -994
+    },
+    "ch6": {
+      "mean_counts": -1317.3954018283566,
+      "std_counts": 6.260775602431159,
+      "min_counts": -1351,
+      "max_counts": -1282
+    },
+    "ch7": {
+      "mean_counts": -1448.0739350757606,
+      "std_counts": 6.323689146182692,
+      "min_counts": -1483,
+      "max_counts": -1412
+    },
+    "ch8": {
+      "mean_counts": -871.3275861537801,
+      "std_counts": 6.1671099529447915,
+      "min_counts": -904,
+      "max_counts": -839
+    }
+  },
+  "run_error": null,
+  "notes": [
+    "Counts are raw ADS1299 24-bit values at gain 24.",
+    "LSB at gain 24, VREF 4.5 V: 4.5/(24*2^23) = 2.235e-8 V.",
+    "Full scale at gain 24: +/-4.5/24 = +/-187.5 mV.",
+    "OpenBCI packets omit the ADS1299 status word and DRDY timestamp.",
+    "Recorder streams raw.bin and keeps online channel statistics; memory is constant during the run."
+  ]
+}

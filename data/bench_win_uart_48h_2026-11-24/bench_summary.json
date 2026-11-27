@@ -1,0 +1,68 @@
+{
+  "label": "win-uart-stream-48h-r2",
+  "note": "post-sleep-fix-keepawake-usb-suspend-off",
+  "start_utc": "2026-11-24T15:19:10.555+00:00",
+  "duration_s": 172801.16666340828,
+  "frames": 42820366,
+  "device_drdy": 42824058,
+  "device_frames": 42824053,
+  "host_minus_device_frames": -3687,
+  "startup_frames_est": 120,
+  "transport_loss_est": 3567,
+  "visible_gap_samples": 1003,
+  "visible_gap_events": 797,
+  "visible_gap_fraction": 2.342288496194505e-05,
+  "reconciled_gap_fraction": 8.32943112600762e-05,
+  "max_visible_gap_samples": 205,
+  "max_timestamp_gap_s": 19.187705993652344,
+  "fs_effective_host": 247.80304593614133,
+  "fs_effective_meta": 247.8013709444907,
+  "device_counters_start": {
+    "drdy": 0,
+    "frames": 0,
+    "sync_error": 0,
+    "spi_error": 0,
+    "timeout": 0,
+    "queue_overrun": 0,
+    "transport_drop": 0,
+    "verify_error": 0
+  },
+  "device_counters_end": {
+    "drdy": 42824058,
+    "frames": 42824053,
+    "sync_error": 2,
+    "spi_error": 0,
+    "timeout": 93899,
+    "queue_overrun": 0,
+    "transport_drop": 0,
+    "verify_error": 0
+  },
+  "device_counter_delta": {
+    "sync_error": 2,
+    "frames": 42824053,
+    "spi_error": 0,
+    "queue_overrun": 0,
+    "drdy": 42824058,
+    "verify_error": 0,
+    "transport_drop": 0,
+    "timeout": 93899
+  },
+  "rss_kb": {
+    "n": 2880,
+    "min": 12804,
+    "max": 22392,
+    "mean": 14251.670833333334,
+    "first": 22068,
+    "last": 13276
+  },
+  "watchdog": {
+    "n": 2846,
+    "ok": 2845,
+    "recorder_exited": 1,
+    "max_stalled_seconds": 0
+  },
+  "verdict": "PASS",
+  "thresholds": {
+    "max_gap_fraction": 0.02
+  }
+}

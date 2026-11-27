@@ -2,7 +2,7 @@
 
 > 目的：在接生物材料之前，先证明“电极 → ADS1299 → ESP32 → 笔记本”这条链路能测到 µV 级慢信号，并且漂移、50 Hz 可控。
 > 通过标准：T1–T6 全部 PASS，才允许接黏菌。
-> 进度：**T1/T2 PASS（2026-11-11）**；**T6 PASS（2026-11-12）**；T3–T5 待做。
+> 进度：**T1/T2 PASS（2026-11-11）**；**T6 PASS（2026-11-12）**；**T6 传输链 48 h PASS（2026-11-26，Windows COM）**；T3–T5 待做。
 
 ## 0. 准备
 
@@ -142,7 +142,7 @@ python3 host/bcikit_openbci.py --port /dev/ttyUSB0 --mode diff \
 - 饱和：检查电极半电池电位；当前固件 gain 24 固定，不能用降增益掩盖。
 - `diff` 配置默认开启内部 BIAS（P/N 均参与），为浮动样品提供共模回路；若 T5 显示偏置电流导致极化，需固件关闭 BIAS 后复测（当前无主机命令）。
 
-## T6 时基与丢样审计 — PASS 2026-11-12
+## T6 时基与丢样审计 — PASS 2026-11-12 / 2026-11-22
 
 **做法**：250 SPS 连续记录 ≥ 10 min（`diff` 或 `short`）；记录开始/结束的主机时间；相机 1 帧/10 s 拍时钟卡。
 
@@ -171,9 +171,15 @@ python3 host/bcikit_openbci.py --port /dev/ttyUSB0 --mode short \
 
 **传输 A/B（2026-11-12）**：Windows 原生 COM6（pyserial 3.5，**主机在用**）30 min：445,637 帧，缺口 **14 样本 = 0.0031%**（全为单样本，max step 2），host 247.58 SPS；对比 usbipd soak 整体 2.107% / 稳态 1.566% → **丢样在 usbipd/WSL 路径**，板子与 ESP32 UART 输出无罪。注意：**打开 COM6 会触发 DTR/RTS 复位 ESP32**（起始计数全 0；结束后再开端口又复位，结束计数不可读）→ 记录器需补"结束 status"与开端口后 1–2 s 延时。证据 `data/bench_win_uart_30m/`。
 
+**2 h Windows COM soak（2026-11-22）**：1,784,268 帧 / 7201 s；缺口 46 次 / 46 样本 = **0.00258%**（全单样本，max step 2，零步进 0；12 个 10 min 分箱 0.0007–0.0054%，无上升趋势）；`fs_effective` 247.821 SPS（样本钟）/ 247.815 SPS（主机钟），差 0.0024% ≈ 缺口率。结束计数（`meta.json.device_status_end`，关端口前读取）：drdy 1,784,444、frames 1,784,438、**transport_drop 0**、queue_overrun 0、spi_error 0、sync_error 3、timeout 3,934 → 板子与 ESP32 UART 输出干净；对比 usbipd soak 2.107% → **~817×**（稳态 1.566% → ~607×）。11-16 记录器 diff（1.5 s 启动延时 + 结束 status）端到端验证通过。**限制**：输出走 WSL 9p 共享，主机正常交互使用；2 h RSS 535 MB，内存随样本数线性增长。**记录器已于 2026-11-22 流式化**：`raw.bin` 增量落盘 + Welford 在线统计，60 s 冒烟 14,842 帧、0 缺口、RSS **22 MB**，统计与 CSV 对拍（mean 4e-12、std 3e-13、min/max 精确）；48 h 内存缺口闭合。证据 `data/bench_win_uart_2h_2026-11-22/`（`ANALYSIS.md`、`timeline.png`、`meta.json`、`SHA256SUMS`）；流式冒烟 `data/bench_win_uart_smoke_stream_2026-11-22/`。
+
+**30 min 流式验证（2026-11-22，C: 本地盘）**：445,901 帧 / 1801 s；缺口 7 次 / 7 样本 = **0.00157%**（全单样本）；`fs_effective` 247.726 SPS（样本钟）/ 247.723 SPS（主机钟）；结束计数 drdy 446,037、frames 446,033、**transport_drop 0**、queue_overrun 0、spi_error 0、sync_error 1、timeout 1,028。内存监视器每 60 s 采样 31 点：RSS **21.1–21.6 MB**，无增长（旧版 2 h 535 MB）；meta 统计与 CSV 独立重算一致（mean 3e-11、std 1e-12、min/max 精确）。输出写 **C: 本地盘**（`win_uart_stream_30m_2026-11-22`），验证 48 h 路径；D: 仅 8.4 GB 空闲，48 h 应写 C:。证据 `data/bench_win_uart_stream_30m_2026-11-22/`（含 `ANALYSIS.md`、`memory.csv`、`stdout.log`、`SHA256SUMS`）。
+
+**48 h Windows COM soak（2026-11-24/26）**：42,820,366 帧 / 172,801 s；可见缺口 1,003 / 797 次 = **0.00234%**（794 次单样本、2 次两样本、1 次 205 样本；duplicates 0，max step 206）；device-frame 对账 ~3,567 / 42,824,053 = **0.00833%**（8-bit 样本号对 >255 的缺口有别名，2,564 帧差 = 10×256+4，集中在一次 burst）。唯一显著事件：H 47 一次主机侧 **~11 s burst**（host 时间戳 gap 19.188 s；无 Kernel-Power 事件，非 S0 睡眠）；排除该 burst 后对账缺口 ~0.0019%。结束计数：drdy 42,824,058、frames 42,824,053、**transport_drop 0**、queue_overrun 0、spi_error 0、verify_error 0、sync_error 2；`timeout` 0.543 s⁻¹ 与 2 h 同率（固件 DRDY-wait 计数，不是丢样计数）。RSS 12.8–22.4 MB 无增长；watchdog 2,845 行 = 2,844 ok + recorder-exited，0 stall。判定 **PASS**（可见 ~854×、对账 ~240× 低于 2%；vs usbipd 2.107% ≈ 253×/900×）。证据 `data/bench_win_uart_48h_2026-11-24/`（`ANALYSIS.md`、`analysis.json`、`SHA256SUMS`）；raw 1.413 GB + CSV 4.178 GB 原件留在记录主机，哈希见 `SHA256SUMS.recorder`。**2026-11-27**：watchdog 增加 `--csv` 序列/主机时间戳缺口告警（`GAP_ALERT.txt`），不再只看文件增长；样本号 step > 2 或 host timestamp gap > 1 s 时告警。
+
 **相机同步**：当前厂商固件没有主机可控的标记 GPIO；旧 ADS1256 的 GPIO32 LED 方案不适用。用启停事件 + 时钟卡，时间轴以样本号为准。若后续需要硬件标记，需改固件（未实现）。
 
-**后续方案**：BCIKit 原生帧（WiFi TCP）带 32 位序号、64 位 DRDY 时间戳和 CRC-16，是 48 h 记录的候选；当前 UART 记录器只解析 OpenBCI 帧。
+**后续方案**：**Windows 原生 COM 已通过 2 h（0.00258%）与 48 h（0.00234% 可见 / 0.00833% 对账）soak，是默认记录路径**；记录器流式化后 RSS 21–22 MB 恒定。48 h 输出写 Windows 本地盘（C:），不走 WSL 9p。BCIKit 原生帧（WiFi TCP）带 32 位序号、64 位 DRDY 时间戳和 CRC-16，在需要设备时间戳或无歧义账本时使用（N1 待做）；当前 UART 记录器只解析 OpenBCI 帧。长跑时用 `run_scripts/watchdog.py`（2026-11-27 起支持 `--csv` 序列缺口告警）。
 
 ## 结果记录
 

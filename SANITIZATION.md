@@ -1,4 +1,4 @@
-# Publication sanitization (2026-11-14)
+# Publication sanitization (2026-11-14, updated 2026-11-27)
 
 Before the first public release, the following changes were made. Raw
 measurement bytes (`raw.bin`, `samples.csv`) are unchanged.
@@ -27,6 +27,21 @@ measurement bytes (`raw.bin`, `samples.csv`) are unchanged.
 `data/win_uart_partial_2026-11-12`, `sim/results/r1_latent_recovery`,
 `sim/results/r1_clean_control`, `sim/results/e1_effective_complexity`, and
 `docs/modeling-2026-11-14`.
+
+## 2026-11-27 update (soak evidence)
+
+| file | change |
+|---|---|
+| `data/bench_win_uart_smoke_2026-11-22/meta.json` | local hostname replaced with `workstation` |
+| `data/bench_win_uart_smoke_2026-11-22/bench_summary.json` | absolute CSV path replaced with a relative name |
+| `data/bench_win_uart_48h_2026-11-24/analysis.json` | absolute recording-host CSV path replaced with a relative name |
+
+`SHA256SUMS` files were regenerated for the affected evidence directories:
+`data/bench_win_uart_smoke_2026-11-22` and
+`data/bench_win_uart_48h_2026-11-24`. The 48 h `SHA256SUMS` lists the files
+published in the repository; `SHA256SUMS.recorder` preserves the hashes of
+the recorder-side `meta.json`, `raw.bin`, and `samples.csv` that remain on
+the recording host.
 
 Also excluded from publication: the internal run log
 (`data/bench-log.md`), the third-party `vendor/` tree, the internal phase-0

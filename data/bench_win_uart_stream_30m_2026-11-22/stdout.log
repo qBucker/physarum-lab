@@ -1,0 +1,39 @@
+progress frames=14898 elapsed=60s sps=248.29
+progress frames=29774 elapsed=120s sps=248.10
+progress frames=44633 elapsed=180s sps=247.94
+progress frames=59508 elapsed=240s sps=247.92
+progress frames=74362 elapsed=300s sps=247.84
+progress frames=89249 elapsed=360s sps=247.88
+progress frames=104113 elapsed=420s sps=247.86
+progress frames=118949 elapsed=480s sps=247.78
+progress frames=133840 elapsed=540s sps=247.82
+progress frames=148658 elapsed=600s sps=247.73
+progress frames=163501 elapsed=660s sps=247.70
+progress frames=178399 elapsed=720s sps=247.74
+progress frames=193237 elapsed=780s sps=247.71
+progress frames=208120 elapsed=840s sps=247.73
+progress frames=223045 elapsed=900s sps=247.80
+progress frames=237887 elapsed=960s sps=247.77
+progress frames=252743 elapsed=1020s sps=247.76
+progress frames=267591 elapsed=1080s sps=247.74
+progress frames=282455 elapsed=1140s sps=247.74
+progress frames=297325 elapsed=1200s sps=247.74
+progress frames=312203 elapsed=1260s sps=247.75
+progress frames=327086 elapsed=1320s sps=247.76
+progress frames=341910 elapsed=1380s sps=247.73
+progress frames=356807 elapsed=1440s sps=247.75
+progress frames=371677 elapsed=1500s sps=247.75
+progress frames=386542 elapsed=1560s sps=247.75
+progress frames=401365 elapsed=1620s sps=247.72
+progress frames=416221 elapsed=1680s sps=247.72
+progress frames=431123 elapsed=1740s sps=247.74
+frames=445901 elapsed=1801.2s effective_sps=247.56
+ch1: mean=   -937.6 std=    6.16 counts
+ch2: mean=  -1426.1 std=    6.27 counts
+ch3: mean=   -791.0 std=    6.14 counts
+ch4: mean=  -1491.0 std=    6.25 counts
+ch5: mean=  -1028.4 std=    6.13 counts
+ch6: mean=  -1315.0 std=    6.13 counts
+ch7: mean=  -1448.1 std=    6.15 counts
+ch8: mean=   -872.9 std=    6.16 counts
+wrote <outdir>

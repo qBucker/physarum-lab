@@ -4,7 +4,7 @@
 
 黏菌活性软物质实验的**阶段 0**：先把信号链和记录管线跑通，再决定科学问题。
 
-当前状态（2026-11-14）：**BCIkit M1（ADS1299）链路已打通；T1/T2/T6（600 s）PASS；2 h usbipd soak FAIL 但已归因到主机传输；Windows 原生 COM 30 min PASS；T3–T5 与首批 9 皿待做。**
+当前状态（2026-11-27）：**BCIkit M1（ADS1299）链路已打通；T1/T2/T6（600 s）PASS；2 h usbipd soak FAIL 但已归因到主机传输；Windows 原生 COM 30 min / 2 h / 48 h PASS（48 h 可见缺口 0.00234%，对账 0.00833%）；T3–T5 与首批 9 皿待做。**
 
 S1/S1b 高维/非线性测试床（computed，模型内）：rho=0.9 二次耦合格，S1-L2 23/30（0.767；匹配 0.867），直接线性 D1/D2 4/30、7/30；S1-L2 线性格 0/30。**S1b 直接非线性基线 DQ-A（16 原始电极 + 8 区域几何 + 同一二次库）28/30（0.933；匹配 0.967），高于 S1-L2；DQ-A 线性格 0/30；S1 参考 p 差 0.0（120/120）。裁决修正：增益来自二次滞后特征，不是 POD/PCA 潜层表示；S1-L2 对直接线性的结果仍成立；R1 的线性潜层无增益结论不变。** 详见 `sim/results/s1_network/s1_summary.md` 与 `sim/results/s1b_direct_baseline/s1b_summary.md`。
 
@@ -41,6 +41,8 @@ S1/S1b 高维/非线性测试床（computed，模型内）：rho=0.9 二次耦�
 | T6 600 s 短路 | 缺口 0.169%；样本钟 248.99 SPS | < 2% | `data/bench_T6/` |
 | 2 h usbipd soak | 缺口 2.107%（稳态 1.566%） | < 2% | `data/bench_T6_soak2h/`（FAIL，归因 usbipd） |
 | 30 min Windows COM | 缺口 0.0031%（14/445,637） | < 2% | `data/bench_win_uart_30m/` |
+| 2 h Windows COM（流式记录） | 缺口 0.00258%（46/1,784,268） | < 2% | `data/bench_win_uart_2h_2026-11-22/` |
+| 48 h Windows COM | 可见缺口 0.00234%（1,003 样本）；对账 0.00833% | < 2% | `data/bench_win_uart_48h_2026-11-24/` |
 
 > 口径：T1/T2 为 measured；3.750 mV pp 为芯片规格换算（computed：±VREF/2400）。**0.9766 Hz 是名义值**（按 250 SPS）；实测样本时钟不是精确 250（T1 246.8、T2 242.3），绝对频率需按每次运行的 `fs_effective = 样本跨度 / 主机时长` 换算。周期 256 samples 是精确判据。
 
@@ -208,7 +210,7 @@ python3 host/bench_test.py data/bench_T2/samples.csv --label T2 --max-noise-uv 5
 - **UART 丢样**：250 SPS 下有效 244.6 SPS（0.8%）；分析以样本号为准，T6 做缺口审计。
 - **丢样归因（measured）**：2 h usbipd soak 的设备计数 `transport_drop=0`、`queue_overrun=0`、`spi_error=0`，主机少收 2.10% → 丢样在 usbipd/CP2102/USB/WSL 路径，不在 ADS1299/固件；Windows 原生 COM 30 min 仅 0.0031%。
 - **无主机可控标记 GPIO**：厂商固件不提供标记命令；旧 ADS1256 的 GPIO32 LED 方案不适用。相机同步用启停事件 + 时钟卡（T6）。
-- **模拟输入针脚未文档化**：本机厂商文档只给出数字接口针脚；模拟输入必须用配套线束/转接板。
+- **模拟输入针脚**：厂商文档只给出数字接口针脚；左侧 2×10 模拟排针的逐针映射由卖家于 2026-11-15 口述提供（CH8–CH1 同列成对，两端为 BIAS/SRB1/SRB2），**两排第 1 针均标 BIAS，其一应为 GND，待万用表通断确认**；T7 配对法复核见 `protocols/bench-pinmap.md`。
 - **BIAS 对非人体样品的影响未知**：`diff` 配置默认开启内部 BIAS（P/N 均参与），为浮动样品提供共模回路；是否引起电极极化由 T5 评估（当前无主机开关命令）。
 
 ## 12. 文档

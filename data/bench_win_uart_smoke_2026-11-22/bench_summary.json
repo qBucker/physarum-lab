@@ -1,0 +1,89 @@
+{
+  "n": 7464,
+  "duration_s": 29.987032890319824,
+  "fs_median_hz": 248.87423931859092,
+  "mean_mV": -0.020979328378965705,
+  "std_mV": 0.00013576220928022994,
+  "ptp_mV": 0.0010728816000000023,
+  "noise_uv_detrended": 0.1357345392538235,
+  "noise_band_uv": 0.034850901937783924,
+  "noise_band_lo_hz": 0.01,
+  "noise_band_hi_hz": 5.0,
+  "drift_mV_per_h_linear": 0.0011396183962796493,
+  "drift_mV_per_h_binned": 0.0003308011951050053,
+  "notch_hz": 50.0,
+  "mains_applicable": true,
+  "mains_49_51_over_45_55_raw": 0.1777140451190643,
+  "mains_49_51_over_45_55": 0.032947806603247275,
+  "marker_count": 0,
+  "checks": {
+    "noise_band": true,
+    "drift": true,
+    "mains": true
+  },
+  "pass": true,
+  "thresholds": {
+    "max_noise_uv": 5.0,
+    "max_drift_mv_h": 1.0,
+    "max_mains_ratio": 0.5
+  },
+  "label": "win-uart-smoke-30s",
+  "csv": "samples.csv",
+  "format": "bcikit",
+  "channel": "ch1",
+  "channels": {
+    "ch1": {
+      "noise_band_uv": 0.034850901937783924,
+      "drift_mV_per_h_binned": 0.0003308011951050053,
+      "pass": true
+    },
+    "ch2": {
+      "noise_band_uv": 0.04124391388959711,
+      "drift_mV_per_h_binned": 0.0014625356784550034,
+      "pass": true
+    },
+    "ch3": {
+      "noise_band_uv": 0.036113193477018905,
+      "drift_mV_per_h_binned": 0.0026230405902222956,
+      "pass": true
+    },
+    "ch4": {
+      "noise_band_uv": 0.03537659484781978,
+      "drift_mV_per_h_binned": 0.00410845459614562,
+      "pass": true
+    },
+    "ch5": {
+      "noise_band_uv": 0.037398107556756946,
+      "drift_mV_per_h_binned": -0.000193506488884058,
+      "pass": true
+    },
+    "ch6": {
+      "noise_band_uv": 0.03515483447780706,
+      "drift_mV_per_h_binned": 0.0030495193870967922,
+      "pass": true
+    },
+    "ch7": {
+      "noise_band_uv": 0.03790331896549672,
+      "drift_mV_per_h_binned": 0.00027236710562415317,
+      "pass": true
+    },
+    "ch8": {
+      "noise_band_uv": 0.03788349890976738,
+      "drift_mV_per_h_binned": -0.002727502080715441,
+      "pass": true
+    }
+  },
+  "channels_pass_all": true,
+  "sequence": {
+    "samples": 7464,
+    "span_samples": 7463,
+    "gaps": 0,
+    "gap_samples": 0,
+    "zero_steps": 0,
+    "gap_fraction": 0.0,
+    "fs_nominal_hz": 250.0,
+    "fs_effective_hz": 248.87423931859382,
+    "effective_sps_sample_clock": 248.87423931859382,
+    "effective_sps_host_clock": 248.90758706605712
+  }
+}

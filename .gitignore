@@ -18,5 +18,7 @@ __pycache__/
 
 # Local files
 *.log
+# Recorder output logs inside published evidence bundles are part of the run
+!data/**/*.log
 *.tmp
 .DS_Store
